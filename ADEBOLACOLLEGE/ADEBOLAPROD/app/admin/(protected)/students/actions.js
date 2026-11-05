@@ -9,7 +9,12 @@ import invitationErrors from '../../../../utils/invitation-error.cjs';
 import accountEmailState from '../../../../utils/auth-account-state.cjs';
 import accountArchiving from '../../../../utils/account-archiving.cjs';
 
-const { effectiveAdminPermissions, hasAdminPermission, isMainAdminProfile } = adminAuthorization;
+const {
+  effectiveAdminPermissions,
+  hasAdminPermission,
+  isAdminEnabledProfile,
+  isMainAdminProfile,
+} = adminAuthorization;
 const { createInvitationRedirect } = invitationRedirect;
 const { invitationFailure } = invitationErrors;
 const { getAccountEmailAction } = accountEmailState;
@@ -24,11 +29,12 @@ async function getAdminClient(requiredPermission) {
 
   const { data: profile, error: profileError } = await supabase
     .from('profiles')
-    .select(profileSelectColumns('role'))
+    .select(profileSelectColumns('role, admin_enabled'))
     .eq('id', user.id)
     .maybeSingle();
   if (profileError) throw new Error(`Unable to verify the Admin profile: ${profileError.message}`);
-  if (!profile || (!isMainAdminProfile(profile) && profile.role !== 'sub_admin')) {
+  if (!profile || !isAdminEnabledProfile(profile)
+    || (!isMainAdminProfile(profile) && profile.role !== 'sub_admin')) {
     throw new Error('An authorized Admin account is required.');
   }
 

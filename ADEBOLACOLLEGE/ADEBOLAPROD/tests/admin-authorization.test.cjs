@@ -5,6 +5,7 @@ const {
   getAdminLandingPath,
   hasAdminPermission,
   hasAdminRouteAccess,
+  isAdminEnabledProfile,
   isMainAdminProfile,
   requiredPermissions,
 } = require('../utils/admin-authorization.cjs');
@@ -14,11 +15,13 @@ test('Main Admin and Sub-Admin roles are distinguished', () => {
   assert.equal(isMainAdminProfile({ role: 'student' }), false);
   assert.equal(isMainAdminProfile({ role: 'main_admin' }), true);
   assert.equal(isMainAdminProfile({ role: 'sub_admin' }), false);
+  assert.equal(isAdminEnabledProfile({ role: 'main_admin', admin_enabled: true }), true);
+  assert.equal(isAdminEnabledProfile({ role: 'sub_admin', admin_enabled: false }), false);
 });
 
 test('Sub-Admins can access routes only through assigned permissions', () => {
-  const mainAdmin = { role: 'main_admin' };
-  const subAdmin = { role: 'sub_admin' };
+  const mainAdmin = { role: 'main_admin', admin_enabled: true };
+  const subAdmin = { role: 'sub_admin', admin_enabled: true };
 
   assert.equal(hasAdminRouteAccess(mainAdmin, '/admin/users'), true);
   assert.equal(hasAdminRouteAccess(subAdmin, '/admin/results', ['manage_results']), true);
@@ -29,8 +32,15 @@ test('Sub-Admins can access routes only through assigned permissions', () => {
   assert.equal(hasAdminRouteAccess(subAdmin, '/admin/calendar', ['view_dashboard']), false);
 });
 
+test('unauthenticated and non-Admin profiles cannot access protected Admin routes', () => {
+  for (const profile of [null, {}, { role: 'student', admin_enabled: true }]) {
+    assert.equal(hasAdminRouteAccess(profile, '/admin', ['view_dashboard']), false);
+    assert.equal(hasAdminRouteAccess(profile, '/admin/results', ['manage_results']), false);
+  }
+});
+
 test('course and lesson permission aliases are honored without broadening unrelated access', () => {
-  const subAdmin = { role: 'sub_admin' };
+  const subAdmin = { role: 'sub_admin', admin_enabled: true };
 
   assert.equal(hasAdminRouteAccess(subAdmin, '/admin/courses', ['manage_courses_lessons']), true);
   assert.equal(hasAdminRouteAccess(subAdmin, '/admin/lessons', ['manage_courses_lessons']), true);
@@ -43,7 +53,7 @@ test('course and lesson permission aliases are honored without broadening unrela
 });
 
 test('unknown routes are denied, while the profile and first permitted route are available', () => {
-  const subAdmin = { role: 'sub_admin' };
+  const subAdmin = { role: 'sub_admin', admin_enabled: true };
 
   assert.deepEqual(requiredPermissions('/admin/unmapped'), []);
   assert.equal(hasAdminRouteAccess(subAdmin, '/admin/unmapped', ['view_dashboard']), false);
@@ -56,7 +66,11 @@ test('archived Sub-Admins lose route and action authorization without deleting p
   const previous = process.env.SUB_ADMIN_ARCHIVING_ENABLED;
   try {
     process.env.SUB_ADMIN_ARCHIVING_ENABLED = 'true';
-    const archived = { role: 'sub_admin', sub_admin_archived_at: '2026-11-09T12:00:00Z' };
+    const archived = {
+      role: 'sub_admin',
+      admin_enabled: true,
+      sub_admin_archived_at: '2026-11-09T12:00:00Z',
+    };
     const retainedPermissions = ['manage_results'];
 
     assert.equal(hasAdminRouteAccess(archived, '/admin/results', retainedPermissions), false);
@@ -73,9 +87,24 @@ test('Sub-Admin authorization remains backward-compatible before the archive mig
   const previous = process.env.SUB_ADMIN_ARCHIVING_ENABLED;
   try {
     delete process.env.SUB_ADMIN_ARCHIVING_ENABLED;
-    const preMigrationProfile = { role: 'sub_admin', sub_admin_archived_at: null };
+    const preMigrationProfile = {
+      role: 'sub_admin',
+      admin_enabled: true,
+      sub_admin_archived_at: null,
+    };
     assert.equal(hasAdminRouteAccess(preMigrationProfile, '/admin/results', ['manage_results']), true);
   } finally {
     if (previous !== undefined) process.env.SUB_ADMIN_ARCHIVING_ENABLED = previous;
   }
+});
+
+test('disabled Admin accounts cannot access routes, permissions, or sign-in landing paths', () => {
+  const disabledMainAdmin = { role: 'main_admin', admin_enabled: false };
+  const disabledSubAdmin = { role: 'sub_admin', admin_enabled: false };
+
+  assert.equal(hasAdminRouteAccess(disabledMainAdmin, '/admin/users'), false);
+  assert.equal(hasAdminPermission(disabledMainAdmin, [], 'manage_admin_users'), false);
+  assert.equal(hasAdminRouteAccess(disabledSubAdmin, '/admin/results', ['manage_results']), false);
+  assert.equal(hasAdminPermission(disabledSubAdmin, ['manage_results'], 'manage_results'), false);
+  assert.equal(getAdminLandingPath(disabledSubAdmin, ['manage_results']), '/admin/login/sub-admin');
 });
