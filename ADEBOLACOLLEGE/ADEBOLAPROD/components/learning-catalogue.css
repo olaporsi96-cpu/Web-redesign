@@ -1,0 +1,84 @@
+.learning-catalogue { display: grid; gap: 1.4rem; }
+.catalogue-availability { display: flex; align-items: center; justify-content: space-between; gap: 1.2rem; padding: 1.2rem 1.35rem; border: 1px solid #f0d39a; border-radius: 14px; color: #634911; background: #fff8e8; }
+.catalogue-availability strong { display: block; font-size: 1rem; }
+.catalogue-availability p { margin: 0.25rem 0 0; color: #796333; font-size: 0.84rem; }
+.catalogue-availability .btn { flex: 0 0 auto; text-align: center; }
+.learning-catalogue-heading { margin: 0; }
+.catalogue-category-prices { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1rem; }
+.catalogue-price-card { display: grid; gap: 0.35rem; padding: 1rem 1.2rem; border: 1px solid var(--line); border-radius: 13px; background: #fff; box-shadow: 0 8px 24px rgba(18,35,72,0.06); }
+.catalogue-price-card > span { color: var(--muted); font-size: 0.82rem; font-weight: 700; }
+.catalogue-price-card strong { color: var(--navy); font-size: 1.3rem; }
+.catalogue-price-card small { color: var(--muted); font-size: 0.72rem; font-weight: 400; }
+.catalogue-toolbar { display: grid; gap: 0.85rem; padding: 1rem; border: 1px solid var(--line); border-radius: 13px; background: #fff; }
+.catalogue-search { display: flex; align-items: center; gap: 0.55rem; min-height: 44px; padding: 0 0.8rem; border: 1px solid #dfe5ee; border-radius: 9px; color: #72809a; }
+.catalogue-search input { width: 100%; border: 0; outline: 0; color: var(--text); background: transparent; }
+.catalogue-search:focus-within { outline: 3px solid #78a5ff; outline-offset: 2px; }
+.catalogue-category-filters { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+.catalogue-category-filters button { min-height: 38px; padding: 0.45rem 0.8rem; border: 1px solid #d9e1ef; border-radius: 999px; color: #3b4962; background: #fff; cursor: pointer; font-size: 0.78rem; font-weight: 700; }
+.catalogue-category-filters button:hover, .catalogue-category-filters button.is-selected { border-color: #244b9e; color: #fff; background: #193f9a; }
+.catalogue-demo-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1rem; }
+.catalogue-demo-card { min-width: 0; display: flex; flex-direction: column; padding: 1.2rem; border: 1px solid var(--line); border-radius: 14px; background: #fff; box-shadow: 0 8px 24px rgba(18,35,72,0.06); }
+.catalogue-demo-card-top { display: flex; align-items: center; justify-content: space-between; gap: 0.6rem; color: #55627a; font-size: 0.72rem; font-weight: 700; }
+.catalogue-demo-tag { padding: 0.2rem 0.5rem; border-radius: 999px; color: #765317; background: #fff1d2; font-size: 0.65rem; letter-spacing: 0.04em; text-transform: uppercase; }
+.catalogue-demo-card h3 { margin: 0.8rem 0 0.35rem; color: var(--navy); font-size: 1.08rem; line-height: 1.3; }
+.catalogue-demo-card > p { margin: 0; color: var(--muted); font-size: 0.8rem; }
+.catalogue-demo-card dl { display: grid; gap: 0.45rem; margin: 1rem 0; }
+.catalogue-demo-card dl > div { display: flex; justify-content: space-between; gap: 0.75rem; font-size: 0.75rem; }
+.catalogue-demo-card dt { color: var(--muted); }
+.catalogue-demo-card dd { margin: 0; color: var(--text); font-weight: 700; text-align: right; overflow-wrap: anywhere; }
+.catalogue-open-button { width: 100%; margin-top: auto; text-align: center; }
+.catalogue-empty { padding: 2rem 1.25rem; border: 1px dashed #c9d4e5; border-radius: 14px; background: rgba(255,255,255,0.7); text-align: center; }
+.catalogue-empty h3 { margin: 0; color: var(--navy); font-size: 1rem; }
+.catalogue-empty p { margin: 0.4rem auto 0; max-width: 60ch; color: var(--muted); font-size: 0.82rem; }
+.catalogue-protection-note { margin: 0; padding: 0.85rem 1rem; border-radius: 10px; color: #5e6a7c; background: #f0f3f8; font-size: 0.75rem; }
+.lesson-viewer-page { padding: 2.2rem 0 4rem; }
+.lesson-viewer-back { display: inline-flex; margin-bottom: 1.2rem; color: #193f9a; font-size: 0.84rem; font-weight: 700; }
+.lesson-viewer-card { overflow: hidden; border: 1px solid var(--line); border-radius: 16px; background: #fff; box-shadow: var(--shadow); }
+.lesson-viewer-heading { padding: 1.4rem 1.5rem; border-bottom: 1px solid var(--line); }
+.lesson-viewer-heading h1 { margin: 0.4rem 0 0.3rem; color: var(--navy); font-size: clamp(1.5rem, 3vw, 2rem); line-height: 1.2; }
+.lesson-viewer-heading p { margin: 0; color: var(--muted); font-size: 0.85rem; }
+.lesson-viewer-meta { display: flex; flex-wrap: wrap; gap: 0.55rem 1.2rem; margin-top: 0.85rem; color: #4a5870; font-size: 0.78rem; }
+.lesson-viewer-content { min-height: 300px; display: grid; place-items: center; padding: 1.5rem; color: #eaf0ff; background: #111f3c; text-align: center; user-select: none; -webkit-user-select: none; }
+.lesson-viewer-placeholder { width: min(620px, 100%); display: grid; justify-items: center; gap: 0.7rem; padding: 2rem 1.3rem; border: 1px dashed rgba(255,255,255,0.35); border-radius: 14px; background: rgba(255,255,255,0.06); }
+.lesson-viewer-placeholder-icon { width: 58px; height: 58px; display: grid; place-items: center; border-radius: 16px; color: #183970; background: #dce8ff; font-size: 1.4rem; font-weight: 900; }
+.lesson-viewer-placeholder h2 { margin: 0; font-size: 1.15rem; }
+.lesson-viewer-placeholder p { max-width: 52ch; margin: 0; color: #c4cee1; font-size: 0.82rem; }
+.lesson-access-note { margin: 0; padding: 1rem 1.4rem; color: #6a4b11; background: #fff8e8; font-size: 0.78rem; }
+.lesson-protection-note { margin: 1rem 0 0; color: #637087; font-size: 0.74rem; }
+.lesson-not-found { padding: 4rem 0; text-align: center; }
+.lesson-not-found h1 { color: var(--navy); }
+.lesson-not-found p { color: var(--muted); }
+.lesson-not-found .btn { margin-top: 0.7rem; }
+@media (max-width: 850px) {
+  .catalogue-demo-grid { grid-template-columns: repeat(2, minmax(0,1fr)); }
+  .catalogue-availability { align-items: flex-start; flex-direction: column; }
+}
+@media (max-width: 600px) {
+  .catalogue-category-prices { grid-template-columns: 1fr; gap: 0.65rem; }
+  .catalogue-price-card { grid-template-columns: 1fr auto; align-items: center; padding: 0.8rem 1rem; }
+  .catalogue-price-card strong { font-size: 1.05rem; }
+  .catalogue-demo-grid { grid-template-columns: 1fr; }
+  .catalogue-availability .btn { width: 100%; }
+  .lesson-viewer-page { padding-top: 1.2rem; }
+  .lesson-viewer-heading { padding: 1.1rem; }
+  .lesson-viewer-content { min-height: 240px; padding: 1rem; }
+}
+.catalogue-lesson-list { display: grid; gap: 0.4rem; margin: 0 0 1rem; padding: 0; list-style: none; }
+.catalogue-lesson-list li { display: flex; align-items: baseline; gap: 0.5rem; color: var(--text); font-size: 0.78rem; }
+.catalogue-lesson-list code { color: #53617b; font-size: 0.7rem; }
+.catalogue-lesson-list a { color: #2456ba; font-weight: 700; text-decoration: underline; text-decoration-color: transparent; text-underline-offset: 0.16em; }
+.catalogue-lesson-list a:hover,
+.catalogue-lesson-list a:focus-visible { text-decoration-color: currentColor; }
+.catalogue-order-backdrop { position: fixed; inset: 0; z-index: 1000; display: grid; place-items: center; padding: 1rem; background: rgba(15, 27, 49, 0.62); }
+.catalogue-order-dialog { position: relative; width: min(560px, 100%); max-height: 90vh; overflow-y: auto; padding: 1.5rem; border-radius: 16px; background: #fff; box-shadow: 0 24px 70px rgba(0,0,0,0.25); }
+.catalogue-order-dialog > .icon-button { position: absolute; top: 0.7rem; right: 0.7rem; }
+.catalogue-order-dialog h2 { margin: 0 2.2rem 0.55rem 0; color: var(--navy); font-size: 1.25rem; }
+.catalogue-order-dialog > p { color: var(--muted); font-size: 0.85rem; }
+.catalogue-order-dialog .dialog-actions { flex-wrap: wrap; }
+.checkout-mode-options { display: flex; flex-wrap: wrap; gap: 0.75rem 1.25rem; margin: 0; padding: 0.75rem; border: 1px solid var(--line); border-radius: 8px; }
+.checkout-mode-options legend { padding: 0 0.35rem; color: var(--navy); font-size: 0.78rem; font-weight: 700; }
+.checkout-mode-options label { display: inline-flex; align-items: center; gap: 0.45rem; color: var(--text); font-size: 0.78rem; }
+.learning-catalogue .checkout-mode-options input[type="radio"] { width: 1rem; min-height: 1rem; margin: 0; accent-color: var(--blue); }
+.catalogue-open-button:disabled { opacity: 1; cursor: not-allowed; }
+.lesson-private-pdf, .lesson-private-video { width: 100%; min-height: min(75vh, 800px); border: 0; background: #fff; }
+.lesson-private-video { min-height: 0; max-height: 75vh; }
