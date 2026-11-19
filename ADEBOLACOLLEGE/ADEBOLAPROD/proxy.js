@@ -112,7 +112,7 @@ export async function proxy(request) {
 
   const { data: profile, error: profileError } = await supabase
     .from('profiles')
-    .select(profileSelectColumns('role'))
+    .select(profileSelectColumns('role, admin_enabled'))
     .eq('id', user.id)
     .maybeSingle();
 
@@ -135,6 +135,12 @@ export async function proxy(request) {
       NextResponse.redirect(new URL('/admin/login/main?error=unauthorized', request.url)),
       response,
     );
+  }
+  if (profile.admin_enabled !== true) {
+    const loginPath = profile.role === 'sub_admin'
+      ? '/admin/login/sub-admin?error=disabled'
+      : '/admin/login/main?error=disabled';
+    return responseWithCookies(NextResponse.redirect(new URL(loginPath, request.url)), response);
   }
 
   let permissions = [];

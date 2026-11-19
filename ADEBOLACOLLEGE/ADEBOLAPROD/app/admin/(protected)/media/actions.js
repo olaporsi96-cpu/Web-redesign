@@ -3,7 +3,7 @@
 import { createClient } from '../../../../utils/supabase/server';
 import adminAuthorization from '../../../../utils/admin-authorization.cjs';
 
-const { isMainAdminProfile } = adminAuthorization;
+const { isAdminEnabledProfile, isMainAdminProfile } = adminAuthorization;
 
 async function getMainAdmin() {
   const supabase = await createClient();
@@ -11,9 +11,11 @@ async function getMainAdmin() {
   if (authError) throw new Error(`Unable to verify the Admin session: ${authError.message}`);
   if (!user) throw new Error('Main Admin sign-in is required.');
   const { data: profile, error } = await supabase.from('profiles')
-    .select('role').eq('id', user.id).maybeSingle();
+    .select('role, admin_enabled').eq('id', user.id).maybeSingle();
   if (error) throw new Error(`Unable to verify the Admin profile: ${error.message}`);
-  if (!profile || !isMainAdminProfile(profile)) throw new Error('A Main Admin account is required.');
+  if (!profile || !isMainAdminProfile(profile) || !isAdminEnabledProfile(profile)) {
+    throw new Error('An enabled Main Admin account is required.');
+  }
   return { supabase, user };
 }
 

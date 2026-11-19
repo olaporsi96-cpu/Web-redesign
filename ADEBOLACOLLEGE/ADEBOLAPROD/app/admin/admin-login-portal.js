@@ -14,8 +14,11 @@ export default function AdminLoginPortal() {
   const [error, setError] = useState('');
 
   useEffect(() => {
-    if (new URLSearchParams(window.location.search).get('error') === 'unauthorized') {
+    const status = new URLSearchParams(window.location.search).get('error');
+    if (status === 'unauthorized') {
       setError('This account does not have the Main Admin role.');
+    } else if (status === 'disabled') {
+      setError('This Main Admin account is disabled. Ask an administrator to restore access.');
     }
   }, []);
 
@@ -42,15 +45,17 @@ export default function AdminLoginPortal() {
 
       const { data: profile, error: profileError } = await supabase
         .from('profiles')
-        .select('role')
+        .select('role, admin_enabled')
         .eq('id', authData.user.id)
         .maybeSingle();
 
-      if (profileError || !profile || profile.role !== 'main_admin') {
+      if (profileError || !profile || profile.role !== 'main_admin' || profile.admin_enabled !== true) {
         const verificationError = profileError
           ? `Unable to verify the account profile: ${profileError.message}`
           : !profile
             ? 'No profile was found for the authenticated account.'
+            : profile.admin_enabled !== true
+              ? 'This Main Admin account is disabled. Ask an administrator to restore access.'
             : 'This account does not have the Main Admin role.';
         const { error: signOutError } = await supabase.auth.signOut();
         setError(signOutError

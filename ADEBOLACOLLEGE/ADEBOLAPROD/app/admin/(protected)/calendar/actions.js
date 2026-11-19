@@ -4,7 +4,7 @@ import { createClient } from '../../../../utils/supabase/server';
 import adminAuthorization from '../../../../utils/admin-authorization.cjs';
 import calendarEventTypeConfig from '../../../../utils/calendar-event-types.cjs';
 
-const { isMainAdminProfile } = adminAuthorization;
+const { isAdminEnabledProfile, isMainAdminProfile } = adminAuthorization;
 const { calendarEventTypeValues } = calendarEventTypeConfig;
 
 async function getCalendarAdminClient() {
@@ -15,11 +15,13 @@ async function getCalendarAdminClient() {
 
   const { data: profile, error: profileError } = await supabase
     .from('profiles')
-    .select('role')
+    .select('role, admin_enabled')
     .eq('id', user.id)
     .maybeSingle();
   if (profileError) throw new Error(`Unable to verify the Admin profile: ${profileError.message}`);
-  if (!profile || !isMainAdminProfile(profile)) throw new Error('A Main Admin account is required.');
+  if (!profile || !isMainAdminProfile(profile) || !isAdminEnabledProfile(profile)) {
+    throw new Error('An enabled Main Admin account is required.');
+  }
   return { supabase, user };
 }
 

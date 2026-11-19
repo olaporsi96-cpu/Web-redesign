@@ -33,7 +33,12 @@ function isMainAdminProfile(profile) {
   return profile?.role === 'main_admin';
 }
 
+function isAdminEnabledProfile(profile) {
+  return profile?.admin_enabled === true;
+}
+
 function hasAdminPermission(profile, permissions = [], requiredPermission) {
+  if (!isAdminEnabledProfile(profile)) return false;
   if (isMainAdminProfile(profile)) return true;
   if (
     profile?.role !== 'sub_admin'
@@ -57,6 +62,7 @@ function effectiveAdminPermissions(permissions = []) {
 }
 
 function hasAdminRouteAccess(profile, pathname, permissions = []) {
+  if (!isAdminEnabledProfile(profile)) return false;
   if (isMainAdminProfile(profile)) return true;
   if (
     profile?.role !== 'sub_admin'
@@ -71,6 +77,7 @@ function hasAdminRouteAccess(profile, pathname, permissions = []) {
 }
 
 function getAdminLandingPath(profile, permissions = []) {
+  if (!isAdminEnabledProfile(profile)) return '/admin/login/sub-admin';
   const routes = [
     '/admin',
     '/admin/courses',
@@ -91,6 +98,7 @@ module.exports = {
   getAdminLandingPath,
   hasAdminPermission,
   hasAdminRouteAccess,
+  isAdminEnabledProfile,
   isMainAdminProfile,
   requiredPermissions,
 };

@@ -5,7 +5,12 @@ import adminAuthorization from '../../../utils/admin-authorization.cjs';
 import supabaseError from '../../../utils/supabase-error.cjs';
 import accountArchiving from '../../../utils/account-archiving.cjs';
 
-const { effectiveAdminPermissions, hasAdminPermission, isMainAdminProfile } = adminAuthorization;
+const {
+  effectiveAdminPermissions,
+  hasAdminPermission,
+  isAdminEnabledProfile,
+  isMainAdminProfile,
+} = adminAuthorization;
 const { formatSupabaseError } = supabaseError;
 const { profileSelectColumns } = accountArchiving;
 
@@ -27,11 +32,12 @@ async function getAdminContext(requiredPermission) {
 
   const { data: profile, error: profileError } = await supabase
     .from('profiles')
-    .select(profileSelectColumns('id, role'))
+    .select(profileSelectColumns('id, role, admin_enabled'))
     .eq('id', user.id)
     .maybeSingle();
   if (profileError) throw new Error(`Unable to verify the Admin profile: ${profileError.message}`);
-  if (!profile || (!isMainAdminProfile(profile) && profile.role !== 'sub_admin')) {
+  if (!profile || !isAdminEnabledProfile(profile)
+    || (!isMainAdminProfile(profile) && profile.role !== 'sub_admin')) {
     throw new Error('An authorized Admin account is required.');
   }
 

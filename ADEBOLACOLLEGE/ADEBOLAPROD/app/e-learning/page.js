@@ -7,10 +7,21 @@ export const dynamic = 'force-dynamic';
 
 export default async function ELearningPage() {
   const supabase = await createClient();
-  const { data: courses, error: coursesError } = await supabase.from('courses')
-    .select('id,title,category,description,price')
-    .eq('status', 'published')
-    .order('title');
+  const [coursesResponse, paymentSettingsResponse, featureVideoResponse] = await Promise.all([
+    supabase.from('courses')
+      .select('id,title,category,description,price')
+      .eq('status', 'published')
+      .order('title'),
+    supabase.from('course_payment_settings')
+      .select('bank_name,account_name,account_number')
+      .eq('id', true)
+      .maybeSingle(),
+    supabase.from('elearning_feature_settings')
+      .select('video_path,published')
+      .eq('id', true)
+      .maybeSingle(),
+  ]);
+  const { data: courses, error: coursesError } = coursesResponse;
   let lessons = [];
   let lessonsError = null;
   const courseIds = (courses || []).map((course) => course.id);
@@ -23,10 +34,8 @@ export default async function ELearningPage() {
     lessons = response.data || [];
     lessonsError = response.error;
   }
-  const { data: paymentSettings, error: paymentSettingsError } = await supabase.from('course_payment_settings')
-    .select('bank_name,account_name,account_number').eq('id', true).maybeSingle();
-  const { data: featureVideo } = await supabase.from('elearning_feature_settings')
-    .select('video_path,published').eq('id', true).maybeSingle();
+  const { data: paymentSettings, error: paymentSettingsError } = paymentSettingsResponse;
+  const { data: featureVideo } = featureVideoResponse;
   const catalogueError = coursesError || lessonsError || paymentSettingsError;
   const featureVideoUrl = featureVideo?.published && featureVideo.video_path
     ? supabase.storage.from('elearning-public-media').getPublicUrl(featureVideo.video_path).data.publicUrl

@@ -26,6 +26,7 @@ export function AdminProvider({ children, initialProfile }) {
     displayName: initialProfile.display_name,
     email: initialProfile.email,
     role: initialProfile.role,
+    adminEnabled: initialProfile.admin_enabled === true,
     permissions: initialProfile.role === 'main_admin'
       ? ADMIN_PERMISSION_DEFINITIONS.map(({ key }) => key)
       : initialProfile.permissions || [],
@@ -34,6 +35,7 @@ export function AdminProvider({ children, initialProfile }) {
   const value = useMemo(() => ({
     adminProfile,
     canAdmin(permission) {
+      if (!adminProfile.adminEnabled) return false;
       if (adminProfile.role === 'main_admin') return true;
       if (adminProfile.permissions.includes(permission)) return true;
       if (permission === 'manage_courses') {

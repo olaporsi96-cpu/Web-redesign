@@ -5,7 +5,7 @@ import { createClient } from '../../../utils/supabase/server';
 import adminAuthorization from '../../../utils/admin-authorization.cjs';
 import accountArchiving from '../../../utils/account-archiving.cjs';
 
-const { isMainAdminProfile } = adminAuthorization;
+const { isAdminEnabledProfile, isMainAdminProfile } = adminAuthorization;
 const { profileSelectColumns, isAccountArchivingEnabled } = accountArchiving;
 
 export const dynamic = 'force-dynamic';
@@ -21,7 +21,7 @@ export default async function ProtectedAdminLayout({ children }) {
 
   const { data: profile, error: profileError } = await supabase
     .from('profiles')
-    .select(profileSelectColumns('id, display_name, email, role'))
+    .select(profileSelectColumns('id, display_name, email, role, admin_enabled'))
     .eq('id', user.id)
     .maybeSingle();
 
@@ -30,6 +30,11 @@ export default async function ProtectedAdminLayout({ children }) {
   }
   if (!profile || (!isMainAdminProfile(profile) && profile.role !== 'sub_admin')) {
     redirect('/admin/login/main?error=unauthorized');
+  }
+  if (!isAdminEnabledProfile(profile)) {
+    redirect(profile.role === 'sub_admin'
+      ? '/admin/login/sub-admin?error=disabled'
+      : '/admin/login/main?error=disabled');
   }
   if (isAccountArchivingEnabled() && profile.role === 'sub_admin' && profile.sub_admin_archived_at) {
     redirect('/admin/login/sub-admin?error=archived');

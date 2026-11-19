@@ -24,6 +24,8 @@ export default function SubAdminLoginPortal({ archivingEnabled }) {
       setError('This account does not have permission to access that Admin area.');
     } else if (status === 'archived') {
       setError('This Sub-Admin account is archived and cannot sign in. Ask the Main Admin to restore it if access is needed.');
+    } else if (status === 'disabled') {
+      setError('This Sub-Admin account is disabled. Ask the Main Admin to restore access.');
     }
   }, []);
 
@@ -43,7 +45,9 @@ export default function SubAdminLoginPortal({ archivingEnabled }) {
 
       const { data: profile, error: profileError } = await supabase
         .from('profiles')
-        .select(archivingEnabled ? 'role, sub_admin_archived_at' : 'role')
+        .select(archivingEnabled
+          ? 'role, admin_enabled, sub_admin_archived_at'
+          : 'role, admin_enabled')
         .eq('id', authData.user.id)
         .maybeSingle();
       if (profileError) {
@@ -63,6 +67,13 @@ export default function SubAdminLoginPortal({ archivingEnabled }) {
         setError(signOutError
           ? `This account does not have the Sub-Admin role. Sign-out failed: ${signOutError.message}`
           : 'This account does not have the Sub-Admin role.');
+        return;
+      }
+      if (profile.admin_enabled !== true) {
+        const { error: signOutError } = await supabase.auth.signOut();
+        setError(signOutError
+          ? `This Sub-Admin account is disabled. Sign-out failed: ${signOutError.message}`
+          : 'This Sub-Admin account is disabled. Ask the Main Admin to restore access.');
         return;
       }
       if (archivingEnabled && profile.sub_admin_archived_at) {

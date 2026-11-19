@@ -5,6 +5,10 @@ export const metadata = {
   title: 'Adebola College | Ilorin, Kwara State',
   description:
     'Learn about Adebola College, a private coeducational school in Ilorin, Kwara State, offering Junior and Senior Secondary education and distance learning.',
+  icons: {
+    icon: [{ url: '/icon.png', type: 'image/png', sizes: '512x512' }],
+    apple: [{ url: '/apple-icon.png', type: 'image/png', sizes: '180x180' }],
+  },
 };
 
 export default function RootLayout({ children }) {

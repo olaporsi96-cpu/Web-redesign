@@ -9,7 +9,7 @@ import invitationErrors from '../../../../utils/invitation-error.cjs';
 import accountEmailState from '../../../../utils/auth-account-state.cjs';
 import accountArchiving from '../../../../utils/account-archiving.cjs';
 
-const { isMainAdminProfile } = adminAuthorization;
+const { isAdminEnabledProfile, isMainAdminProfile } = adminAuthorization;
 const { createInvitationRedirect } = invitationRedirect;
 const { invitationFailure } = invitationErrors;
 const { getAccountEmailAction } = accountEmailState;
@@ -38,12 +38,14 @@ async function getMainAdminClient() {
 
   const { data: profile, error: profileError } = await supabase
     .from('profiles')
-    .select('role')
+    .select('role, admin_enabled')
     .eq('id', user.id)
     .maybeSingle();
 
   if (profileError) throw new Error(`Unable to verify the Main Admin profile: ${profileError.message}`);
-  if (!profile || !isMainAdminProfile(profile)) throw new Error('A Main Admin account is required to manage Sub-Admin accounts.');
+  if (!profile || !isMainAdminProfile(profile) || !isAdminEnabledProfile(profile)) {
+    throw new Error('An enabled Main Admin account is required to manage Sub-Admin accounts.');
+  }
   return { supabase, user };
 }
 
