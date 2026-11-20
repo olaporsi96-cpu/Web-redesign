@@ -1,0 +1,56 @@
+
+name: Adebola College Staging Build
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: ADEBOLACOLLEGE/ADEBOLAPROD
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22.23.5'
+          cache: npm
+          cache-dependency-path: ADEBOLACOLLEGE/ADEBOLAPROD/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run tests
+        run: npm test
+
+      - name: Build production application
+        run: npm run build
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.ADEBOLA_STAGING_SUPABASE_URL }}
+          NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.ADEBOLA_STAGING_SUPABASE_PUBLISHABLE_KEY }}
+          NEXT_PUBLIC_SITE_URL: https://staging.adebolacollege.org
+
+      - name: Package production application
+        run: |
+          tar -czf "$GITHUB_WORKSPACE/adebola-staging-build.tar.gz" \
+            --exclude=node_modules \
+            --exclude=.git \
+            --exclude=.next/cache \
+            --exclude='.env*' \
+            .
+
+      - name: Upload deployment package
+        uses: actions/upload-artifact@v4
+        with:
+          name: adebola-staging-build
+          path: adebola-staging-build.tar.gz
+          retention-days: 7
