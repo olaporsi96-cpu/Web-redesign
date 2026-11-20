@@ -1,7 +1,9 @@
-
 name: Adebola College Staging Build
 
 on:
+  push:
+    branches:
+      - feature/adebola-github-build
   workflow_dispatch:
 
 permissions:
@@ -41,11 +43,11 @@ jobs:
 
       - name: Package production application
         run: |
-          tar -czf "$GITHUB_WORKSPACE/adebola-staging-build.tar.gz" \
-            --exclude=node_modules \
-            --exclude=.git \
-            --exclude=.next/cache \
-            --exclude='.env*' \
+          tar -czf "$GITHUB_WORKSPACE/adebola-staging-build.tar.gz" \\
+            --exclude=node_modules \\
+            --exclude=.git \\
+            --exclude=.next/cache \\
+            --exclude='.env*' \\
             .
 
       - name: Upload deployment package
