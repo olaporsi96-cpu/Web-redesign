@@ -1,3 +1,4 @@
+
 name: Adebola College Staging Build
 
 on:
@@ -34,6 +35,32 @@ jobs:
       - name: Run tests
         run: npm test
 
+      - name: Verify staging Supabase configuration
+        shell: bash
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.ADEBOLA_STAGING_SUPABASE_URL }}
+          NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.ADEBOLA_STAGING_SUPABASE_PUBLISHABLE_KEY }}
+        run: |
+          set -euo pipefail
+
+          if [ -z "$NEXT_PUBLIC_SUPABASE_URL" ]; then
+            echo "::error::ADEBOLA_STAGING_SUPABASE_URL is missing or empty."
+            exit 1
+          fi
+
+          if [ -z "$NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY" ]; then
+            echo "::error::ADEBOLA_STAGING_SUPABASE_PUBLISHABLE_KEY is missing or empty."
+            exit 1
+          fi
+
+          if [ "$NEXT_PUBLIC_SUPABASE_URL" != "https://jmxuffazlpcdwcpqnjau.supabase.co" ]; then
+            echo "::error::The staging build is not configured for the approved development Supabase project."
+            exit 1
+          fi
+
+          echo "Staging Supabase URL and publishable-key secret are present."
+          echo "The build target is the approved development project."
+
       - name: Build production application
         run: npm run build
         env:
@@ -43,7 +70,12 @@ jobs:
 
       - name: Package production application
         run: |
-          tar -czf "$GITHUB_WORKSPACE/adebola-staging-build.tar.gz" --exclude=node_modules --exclude=.git --exclude=.next/cache --exclude='.env*' .
+          tar -czf "$GITHUB_WORKSPACE/adebola-staging-build.tar.gz" \
+            --exclude=node_modules \
+            --exclude=.git \
+            --exclude=.next/cache \
+            --exclude='.env*' \
+            .
 
       - name: Upload deployment package
         uses: actions/upload-artifact@v4
