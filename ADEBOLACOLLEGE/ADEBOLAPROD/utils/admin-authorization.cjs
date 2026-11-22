@@ -34,7 +34,10 @@ function isMainAdminProfile(profile) {
 }
 
 function isAdminEnabledProfile(profile) {
-  return profile?.admin_enabled === true;
+  // Database profiles use admin_enabled; AdminProvider exposes adminEnabled.
+  // Support both shapes so the client-side route guard sees the enabled state.
+  if (typeof profile?.admin_enabled === 'boolean') return profile.admin_enabled;
+  return profile?.adminEnabled === true;
 }
 
 function hasAdminPermission(profile, permissions = [], requiredPermission) {
