@@ -80,6 +80,8 @@ Local migration files, in dependency order:
 11. `supabase/migrations/20261109000100_recoverable_account_archiving.sql` — recoverable student and Sub-Admin account archiving.
 12. `supabase/migrations/20261123000100_guest_course_entitlements_and_expiry.sql` — additive TEST-only guest entitlements, seven-day paid expiry, receipt-required guest orders, account type, lesson details, secure access verification, initial entitlement management functions, and Website Settings persistence.
 13. `supabase/migrations/20261124000100_security_and_settings.sql` — legacy RPC restrictions, audited individual/bulk revocation, repurchase audit history, Main-Admin-only Website Settings writes, private image-storage permissions, and guarded content deletion.
+14. `supabase/migrations/20261125000100_uuid_safe_course_payment_settings.sql` — adds the payment account type and uses the existing settings row without assuming its primary-key type.
+15. `supabase/migrations/20261125000200_course_lesson_metadata_alignment.sql` — repeat-safe repair for lesson description and duration columns required by Admin and the public E-Learning catalogue.
 
 Migration files do not prove that the matching schema is installed in Supabase. The TEST schema, migration history, and storage policies have not been inspected or changed as part of this implementation. Do not assume TEST is ready for end-to-end testing, and do not apply migrations as part of packaging or cPanel deployment. Before staging release, have the TEST schema, migration history/order, and RLS/storage policies reviewed and updated only through the separately approved database process. The one-time Main Admin bootstrap must not be rerun.
 

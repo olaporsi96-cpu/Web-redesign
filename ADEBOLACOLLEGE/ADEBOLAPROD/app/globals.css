@@ -1717,3 +1717,19 @@ button, input, textarea, select { font: inherit; }
   :root:not([data-theme='light']):not([data-theme='dark']) :is(.result-slip-header, .result-slip-details, .result-slip-details > div, .result-slip-status, .result-subject-table th, .result-subject-table td) { border-color: #405748; }
 }
 .website-hero-image-preview { display: block; width: min(100%, 900px); max-height: 55vh; object-fit: contain; border: 1px solid var(--line); border-radius: 10px; background: #f5f7fb; }
+
+
+/* Keep intentionally dark feature bands dark in dark theme too.
+   --navy is also used as a text token elsewhere, so it must not control
+   the background of sections that keep white foreground text. */
+:root[data-theme='dark'] :is(.full-bleed, .curriculum-section) {
+  background-color: #0b1832;
+  color: #edf3ff;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']):not([data-theme='dark']) :is(.full-bleed, .curriculum-section) {
+    background-color: #0b1832;
+    color: #edf3ff;
+  }
+}
