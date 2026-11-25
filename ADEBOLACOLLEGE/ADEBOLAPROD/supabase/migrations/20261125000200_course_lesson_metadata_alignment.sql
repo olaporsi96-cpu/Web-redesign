@@ -78,7 +78,7 @@ returns uuid
 language plpgsql
 security definer
 set search_path = pg_catalog, public, pg_temp
-as $
+as $$
 declare saved_id uuid;
 begin
   if lesson_description is null or length(lesson_description) > 5000
@@ -103,7 +103,7 @@ begin
 
   return saved_id;
 end;
-$;
+$$;
 
 revoke all on function public.save_lesson(uuid, uuid, text, text, text, text, integer)
   from public, anon;
