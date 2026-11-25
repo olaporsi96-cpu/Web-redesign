@@ -13,8 +13,9 @@ export default async function ELearningPage() {
       .eq('status', 'published')
       .order('title'),
     supabase.from('course_payment_settings')
-      .select('bank_name,account_name,account_number')
-      .eq('id', true)
+      .select('bank_name,account_name,account_number,account_type')
+      .order('updated_at', { ascending: false })
+      .limit(1)
       .maybeSingle(),
     supabase.from('elearning_feature_settings')
       .select('video_path,published')
