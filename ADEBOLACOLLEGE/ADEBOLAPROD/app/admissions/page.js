@@ -40,6 +40,26 @@ const admissionQuestions = [
     question: 'Where can I find examination dates and venues?',
     answer: 'Check the school website newsletters for important entrance examination dates and venues.',
   },
+  {
+    id: 'faq-papers',
+    question: 'Which sample entrance examination papers are available?',
+    answer: 'The College provides JSS1 English, JSS1 Mathematics, SS1 English, and SS1 Mathematics sample entrance examination papers for prospective students to review.',
+  },
+  {
+    id: 'faq-cbt',
+    question: 'Which computer-based examinations does the College facilitate?',
+    answer: 'Adebola College facilitates Computer-Based Testing (CBT) for examination bodies such as JAMB and WAEC.',
+  },
+  {
+    id: 'faq-cbt-fees',
+    question: 'What are the listed JAMB and WAEC registration fees?',
+    answer: 'The supplied Admissions information lists the JAMB enrollment registration fee as #40,000 and the WAEC enrollment form registration fee as #30,000.',
+  },
+  {
+    id: 'faq-cbt-payment',
+    question: 'Where should CBT examination fees be paid and where should proof be sent?',
+    answer: 'The supplied Admissions information lists GTB Bank, account number 0008456903. Proof of payment should be sent to contactus@adebola.org.',
+  },
 ];
 
 export default function AdmissionsPage() {
