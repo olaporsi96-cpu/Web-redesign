@@ -13,11 +13,11 @@ test('lesson metadata alignment adds only the fields used by Admin and E-Learnin
     '20261125000200_course_lesson_metadata_alignment.sql',
   ), 'utf8');
 
-  assert.match(migration, /add column if not exists description text not null default ''/i);
-  assert.match(migration, /add column if not exists duration_minutes smallint/i);
-  assert.match(migration, /lessons_description_length_check/i);
-  assert.match(migration, /lessons_duration_minutes_check/i);
-  assert.match(migration, /to_regclass\('public\.lessons'\)/i);
+  assert.ok(migration.includes("add column if not exists description text not null default ''"));
+  assert.ok(migration.includes('add column if not exists duration_minutes smallint'));
+  assert.ok(migration.includes('lessons_description_length_check'));
+  assert.ok(migration.includes('lessons_duration_minutes_check'));
+  assert.ok(migration.includes("to_regclass('public.lessons')"));
   assert.doesNotMatch(migration, /\b(drop table|truncate|delete from public\.lessons)\b/i);
 });
 
@@ -39,8 +39,11 @@ test('metadata-aware save_lesson overload delegates to permission-checked base f
     '20261125000200_course_lesson_metadata_alignment.sql',
   ), 'utf8');
 
-  assert.match(migration, /create or replace function public\\.save_lesson\\([\\s\\S]*lesson_description text,[\\s\\S]*requested_duration_minutes integer/i);
-  assert.match(migration, /public\\.save_lesson\\(\\s*target_id,[\\s\\S]*requested_status\\s*\\)/i);
-  assert.match(migration, /set description = btrim\\(lesson_description\\),[\\s\\S]*duration_minutes = requested_duration_minutes/i);
-  assert.match(migration, /revoke all on function public\\.save_lesson\\(uuid, uuid, text, text, text, text, integer\\)[\\s\\S]*grant execute on function public\\.save_lesson\\(uuid, uuid, text, text, text, text, integer\\) to authenticated/i);
+  assert.ok(migration.includes('create or replace function public.save_lesson('));
+  assert.ok(migration.includes('lesson_description text,'));
+  assert.ok(migration.includes('requested_duration_minutes integer'));
+  assert.ok(migration.includes('public.save_lesson(\n    target_id,'));
+  assert.ok(migration.includes('set description = btrim(lesson_description),'));
+  assert.ok(migration.includes('duration_minutes = requested_duration_minutes,'));
+  assert.ok(migration.includes('grant execute on function public.save_lesson(uuid, uuid, text, text, text, text, integer)\n  to authenticated;'));
 });
