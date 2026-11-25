@@ -26,7 +26,7 @@ export default function LearningCatalogue({ courses, lessons, paymentSettings })
   const [proof, setProof] = useState(null);
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState('');
-  const bankIsConfigured = Boolean(paymentSettings?.bank_name && paymentSettings?.account_name && paymentSettings?.account_number);
+  const bankIsConfigured = Boolean(paymentSettings?.bank_name && paymentSettings?.account_name && paymentSettings?.account_number && paymentSettings?.account_type);
 
   useEffect(() => {
     if (!selectedCourse) return undefined;
@@ -119,7 +119,7 @@ export default function LearningCatalogue({ courses, lessons, paymentSettings })
       {bankIsConfigured ? (
         <aside className="catalogue-availability">
           <div><strong>Manual bank transfer</strong>
-            <p>{paymentSettings.bank_name} · {paymentSettings.account_name} · {paymentSettings.account_number}</p>
+            <p>{paymentSettings.bank_name} · {paymentSettings.account_name} · {paymentSettings.account_number} · {paymentSettings.account_type}</p>
           </div>
           <p>Access is granted only after an Admin verifies and approves your payment.</p>
         </aside>
