@@ -1735,26 +1735,36 @@ button, input, textarea, select { font: inherit; }
 }
 
 
-/* High-contrast dark theme for the public feature bands. Keep their
-   foreground and background paired regardless of the --navy text token. */
+
+/* Explicit dark-mode contrast rules for the public feature bands.
+   Preserve button foreground/background pairs and keep cards distinct. */
 :root[data-theme='dark'] .pathways-section,
 :root[data-theme='dark'] .statement-section,
 :root[data-theme='dark'] .curriculum-section,
 :root[data-theme='dark'] .full-bleed {
   background: #0b1832 !important;
   background-color: #0b1832 !important;
-  color: #edf3ff !important;
-}
-
-:root[data-theme='dark'] :is(.pathways-section, .statement-section, .curriculum-section, .full-bleed)
-  :is(.eyebrow, .eyebrow-light, h2, h3, p, li, a, span) {
   color: #edf3ff;
 }
-
+:root[data-theme='dark'] .pathways-section .section-header :is(h2, p, .eyebrow),
+:root[data-theme='dark'] .statement-section :is(h2, p, .eyebrow),
+:root[data-theme='dark'] .curriculum-section > .container > .two-column > div:first-child :is(h2, p, .eyebrow) {
+  color: #edf3ff !important;
+}
 :root[data-theme='dark'] .pathways-section .pathway-card {
   border-color: rgba(255,255,255,0.2);
   background: rgba(255,255,255,0.07);
   color: #edf3ff;
+}
+:root[data-theme='dark'] .pathways-section .pathway-card :is(h3, p, .pathway-link) {
+  color: #edf3ff;
+}
+:root[data-theme='dark'] .curriculum-section .info-panel-light {
+  border-color: rgba(255,255,255,0.22);
+  background: rgba(255,255,255,0.08);
+}
+:root[data-theme='dark'] .curriculum-section .info-panel-light :is(h3, p, .eyebrow) {
+  color: #edf3ff !important;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -1764,17 +1774,26 @@ button, input, textarea, select { font: inherit; }
   :root:not([data-theme='light']) .full-bleed {
     background: #0b1832 !important;
     background-color: #0b1832 !important;
-    color: #edf3ff !important;
-  }
-
-  :root:not([data-theme='light']) :is(.pathways-section, .statement-section, .curriculum-section, .full-bleed)
-    :is(.eyebrow, .eyebrow-light, h2, h3, p, li, a, span) {
     color: #edf3ff;
   }
-
+  :root:not([data-theme='light']) .pathways-section .section-header :is(h2, p, .eyebrow),
+  :root:not([data-theme='light']) .statement-section :is(h2, p, .eyebrow),
+  :root:not([data-theme='light']) .curriculum-section > .container > .two-column > div:first-child :is(h2, p, .eyebrow) {
+    color: #edf3ff !important;
+  }
   :root:not([data-theme='light']) .pathways-section .pathway-card {
     border-color: rgba(255,255,255,0.2);
     background: rgba(255,255,255,0.07);
     color: #edf3ff;
+  }
+  :root:not([data-theme='light']) .pathways-section .pathway-card :is(h3, p, .pathway-link) {
+    color: #edf3ff;
+  }
+  :root:not([data-theme='light']) .curriculum-section .info-panel-light {
+    border-color: rgba(255,255,255,0.22);
+    background: rgba(255,255,255,0.08);
+  }
+  :root:not([data-theme='light']) .curriculum-section .info-panel-light :is(h3, p, .eyebrow) {
+    color: #edf3ff !important;
   }
 }
