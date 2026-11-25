@@ -62,6 +62,54 @@ begin
 end;
 $$;
 
+-- Ensure the metadata-aware lesson save RPC exists on TEST. It delegates to
+-- the existing permission-checked save_lesson implementation, then updates only
+-- the two additive metadata fields.
+create or replace function public.save_lesson(
+  target_id uuid,
+  target_course_id uuid,
+  lesson_title text,
+  requested_lesson_code text,
+  requested_status text,
+  lesson_description text,
+  requested_duration_minutes integer
+)
+returns uuid
+language plpgsql
+security definer
+set search_path = pg_catalog, public, pg_temp
+as $
+declare saved_id uuid;
+begin
+  if lesson_description is null or length(lesson_description) > 5000
+     or (requested_duration_minutes is not null
+       and requested_duration_minutes not between 1 and 600) then
+    raise exception 'Lesson description or duration is invalid';
+  end if;
+
+  saved_id := public.save_lesson(
+    target_id,
+    target_course_id,
+    lesson_title,
+    requested_lesson_code,
+    requested_status
+  );
+
+  update public.lessons
+  set description = btrim(lesson_description),
+      duration_minutes = requested_duration_minutes,
+      updated_at = now()
+  where id = saved_id;
+
+  return saved_id;
+end;
+$;
+
+revoke all on function public.save_lesson(uuid, uuid, text, text, text, text, integer)
+  from public, anon;
+grant execute on function public.save_lesson(uuid, uuid, text, text, text, text, integer)
+  to authenticated;
+
 commit;
 
 select

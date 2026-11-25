@@ -30,3 +30,17 @@ test('Admin and public catalogue queries request the aligned lesson fields', () 
   assert.match(adminActions, /from\('lessons'\)[\s\S]*description,duration_minutes/i);
   assert.match(publicCatalogue, /from\('lessons'\)[\s\S]*description,duration_minutes/i);
 });
+
+test('metadata-aware save_lesson overload delegates to permission-checked base function', () => {
+  const migration = fs.readFileSync(path.join(
+    root,
+    'supabase',
+    'migrations',
+    '20261125000200_course_lesson_metadata_alignment.sql',
+  ), 'utf8');
+
+  assert.match(migration, /create or replace function public\\.save_lesson\\([\\s\\S]*lesson_description text,[\\s\\S]*requested_duration_minutes integer/i);
+  assert.match(migration, /public\\.save_lesson\\(\\s*target_id,[\\s\\S]*requested_status\\s*\\)/i);
+  assert.match(migration, /set description = btrim\\(lesson_description\\),[\\s\\S]*duration_minutes = requested_duration_minutes/i);
+  assert.match(migration, /revoke all on function public\\.save_lesson\\(uuid, uuid, text, text, text, text, integer\\)[\\s\\S]*grant execute on function public\\.save_lesson\\(uuid, uuid, text, text, text, text, integer\\) to authenticated/i);
+});

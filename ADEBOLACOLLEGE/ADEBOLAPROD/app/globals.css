@@ -1722,13 +1722,13 @@ button, input, textarea, select { font: inherit; }
 /* Keep intentionally dark feature bands dark in dark theme too.
    --navy is also used as a text token elsewhere, so it must not control
    the background of sections that keep white foreground text. */
-:root[data-theme='dark'] :is(.full-bleed, .curriculum-section) {
+:root[data-theme='dark'] :is(.full-bleed, .pathways-section, .statement-section, .curriculum-section) {
   background-color: #0b1832;
   color: #edf3ff;
 }
 
 @media (prefers-color-scheme: dark) {
-  :root:not([data-theme='light']):not([data-theme='dark']) :is(.full-bleed, .curriculum-section) {
+  :root:not([data-theme='light']):not([data-theme='dark']) :is(.full-bleed, .pathways-section, .statement-section, .curriculum-section) {
     background-color: #0b1832;
     color: #edf3ff;
   }
