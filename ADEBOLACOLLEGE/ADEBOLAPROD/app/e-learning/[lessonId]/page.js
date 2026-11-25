@@ -14,7 +14,7 @@ export default async function LessonViewerPage({ params }) {
   if (!user) redirect(`/student/login?next=${encodeURIComponent(`/e-learning/${lessonId}`)}`);
 
   const { data: lesson, error: lessonError } = await supabase.from('lessons')
-    .select('id,course_id,title,lesson_code')
+    .select('id,course_id,title,lesson_code,description,duration_minutes')
     .eq('id', lessonId)
     .eq('status', 'published')
     .maybeSingle();
@@ -52,7 +52,7 @@ export default async function LessonViewerPage({ params }) {
   const { data: material } = materialResult;
   let signedUrl = null;
   if (material) {
-    const { data, error } = await supabase.storage.from('course-materials').createSignedUrl(material.storage_path, 60);
+    const { data, error } = await supabase.storage.from('course-materials').createSignedUrl(material.storage_path, 300);
     if (error) return <LessonServiceError />;
     signedUrl = data.signedUrl;
   }
@@ -67,7 +67,9 @@ export default async function LessonViewerPage({ params }) {
           <div className="lesson-viewer-meta">
             <span>Course: <strong>{course?.title || 'Course'}</strong></span>
             {lesson.lesson_code && <span>Code: <strong>{lesson.lesson_code}</strong></span>}
+            {lesson.duration_minutes && <span>Duration: <strong>{lesson.duration_minutes} minutes</strong></span>}
           </div>
+          {lesson.description && <p className="lesson-detail-text">{lesson.description}</p>}
         </header>
         <div className="lesson-viewer-content">
           {!material ? <div className="lesson-viewer-placeholder"><h2>Lesson material unavailable</h2><p>No file has been attached to this lesson yet.</p></div>
@@ -76,6 +78,7 @@ export default async function LessonViewerPage({ params }) {
                 ? <iframe title={lesson.title} src={signedUrl} className="lesson-private-pdf" />
                 : <video controls preload="metadata" className="lesson-private-video"><source src={signedUrl} type="video/mp4" /></video>}
         </div>
+        <p className="lesson-protection-note">Private, short-lived links reduce casual copying, but cannot prevent external screen recording.</p>
       </article>
     </section>
   );

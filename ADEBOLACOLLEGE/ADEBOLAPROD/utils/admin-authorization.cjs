@@ -15,6 +15,7 @@ const mainAdminOnlyRoutes = [
   '/admin/activity',
   '/admin/media',
   '/admin/calendar',
+  '/admin/website-settings',
 ];
 
 function requiredPermissions(pathname) {

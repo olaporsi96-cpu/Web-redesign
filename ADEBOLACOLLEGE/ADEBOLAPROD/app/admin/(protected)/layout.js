@@ -52,8 +52,17 @@ export default async function ProtectedAdminLayout({ children }) {
     permissions = permissionRows.map((row) => row.permission_key);
   }
 
+  let pendingOrderCount = 0;
+  if (isMainAdminProfile(profile) || permissions.includes('view_orders_payments')) {
+    const { count, error: ordersError } = await supabase.from('course_orders')
+      .select('id', { count: 'exact', head: true })
+      .eq('status', 'pending');
+    if (ordersError) throw new Error(`Unable to retrieve pending payment orders: ${ordersError.message}`);
+    pendingOrderCount = count || 0;
+  }
+
   return (
-    <AdminProvider key={profile.id} initialProfile={{ ...profile, permissions }}>
+    <AdminProvider key={profile.id} initialProfile={{ ...profile, permissions, pending_order_count: pendingOrderCount }}>
       <AdminShell>{children}</AdminShell>
     </AdminProvider>
   );

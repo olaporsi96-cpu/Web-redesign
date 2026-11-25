@@ -5,6 +5,7 @@ import { ConfirmDialog, EmptyState, PageHeading, RetryState, StatusBadge, Toast 
 import LessonForm from '../../_components/lesson-form';
 import {
   archiveLessonAction,
+  deleteLessonAction,
   loadCourseAdminData,
   saveLessonAction,
   setLessonStatusAction,
@@ -63,9 +64,11 @@ export default function LessonsPage() {
     return result;
   }
   async function archive() {
-    const result = await archiveLessonAction(confirming.id);
+    const result = confirming.action === 'delete'
+      ? await deleteLessonAction(confirming.id)
+      : await archiveLessonAction(confirming.id);
     setConfirming(null);
-    if (result.ok) { await refresh(); setToast('Lesson archived.'); }
+    if (result.ok) { await refresh(); setToast(result.warning || (confirming.action === 'delete' ? 'Lesson deleted.' : 'Lesson archived.')); }
     else setError(result.error);
   }
 
@@ -109,7 +112,8 @@ export default function LessonsPage() {
                     if (result.ok) { await refresh(); setToast(lesson.status === 'published' ? 'Lesson unpublished.' : 'Lesson published.'); }
                     else setError(result.error);
                   }}>{lesson.status === 'published' ? 'Unpublish' : 'Publish'}</button>}
-                  {canManage && lesson.status !== 'archived' && (lesson.status !== 'published' || canPublish) && <button type="button" className="text-button text-danger" onClick={() => setConfirming(lesson)}>Archive</button>}
+                  {canManage && lesson.status !== 'archived' && (lesson.status !== 'published' || canPublish) && <button type="button" className="text-button text-danger" onClick={() => setConfirming({ ...lesson, action: 'archive' })}>Archive</button>}
+                  {canManage && lesson.status !== 'published' && <button type="button" className="text-button text-danger" onClick={() => setConfirming({ ...lesson, action: 'delete' })}>Delete lesson</button>}
                 </div></td>
               </tr>
             ))}</tbody>
@@ -126,7 +130,15 @@ export default function LessonsPage() {
         )}
       </section>
       {editing && <LessonForm lesson={editing.isNew ? null : editing} courses={courses} canPublish={canPublish} onSave={save} onClose={() => setEditing(null)} />}
-      {confirming && <ConfirmDialog title="Archive this lesson?" description={`“${confirming.title}” will no longer be offered.`} confirmLabel="Archive lesson" onCancel={() => setConfirming(null)} onConfirm={archive} />}
+      {confirming && <ConfirmDialog
+        title={confirming.action === 'delete' ? 'Delete this lesson?' : 'Archive this lesson?'}
+        description={confirming.action === 'delete'
+          ? `“${confirming.title}” and its attached private video/PDF will be permanently removed.`
+          : `“${confirming.title}” will no longer be offered.`}
+        confirmLabel={confirming.action === 'delete' ? 'Delete lesson' : 'Archive lesson'}
+        onCancel={() => setConfirming(null)}
+        onConfirm={archive}
+      />}
       <Toast message={toast} onDismiss={() => setToast('')} />
     </>
   );

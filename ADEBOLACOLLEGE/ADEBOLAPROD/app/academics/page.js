@@ -1,29 +1,21 @@
 import Image from 'next/image';
 import Link from 'next/link';
-
-const jssTopics = [
-  'Definition and importance of agriculture',
-  'Types of agriculture and local agricultural practices',
-  'Parts of flowering plants and their functions',
-  'Classification and uses of crops',
-  'Farm animals, their characteristics, and uses',
-  'Weeds, pests, and methods of control',
-];
+import ContactEmailLink from '../../components/contact-email-link';
 
 const studyAreas = [
   {
     title: 'Junior Secondary',
-    text: 'The supplied curriculum includes selected JSS subject topics, including Agricultural Science and Basic Science.',
+    text: 'Adebola College provides Junior Secondary education.',
     tag: 'JSS',
   },
   {
     title: 'Senior Secondary',
-    text: 'The school overview describes Senior Secondary education and preparation for WAEC and NECO examinations.',
+    text: 'Senior Secondary students prepare for WAEC and NECO examinations.',
     tag: 'SSS',
   },
   {
     title: 'Assessment and support',
-    text: 'The supplied academic information describes tests, assignments, homework, examinations, and tutoring support.',
+    text: 'Academic progress is assessed through tests, assignments, homework, and examinations, with tutoring support available.',
     tag: 'Learning',
   },
 ];
@@ -37,7 +29,7 @@ export default function AcademicsPage() {
             <span className="eyebrow eyebrow-light">Academics</span>
             <h1>Junior and Senior Secondary learning.</h1>
             <p>
-              Explore the academic information and selected curriculum topics supplied by Adebola College.
+              Explore Junior and Senior Secondary learning at Adebola College.
               Contact the school for its full curriculum brochure.
             </p>
             <div className="hero-actions">
@@ -54,7 +46,7 @@ export default function AcademicsPage() {
               className="hero-crest"
             />
             <p>Junior Secondary<br />Senior Secondary</p>
-            <span className="hero-statement-caption">Academic levels listed in the supplied content</span>
+            <span className="hero-statement-caption">Junior and Senior Secondary</span>
           </div>
         </div>
       </section>
@@ -65,8 +57,8 @@ export default function AcademicsPage() {
             <span className="eyebrow">Academic information</span>
             <h2>Learning across the secondary years.</h2>
             <p>
-              The supplied school overview says academic progress is assessed through a combination of tests,
-              assignments, homework, and examinations. It also describes tutoring support for students who are
+              Academic progress is assessed through a combination of tests,
+              assignments, homework, and examinations. Tutoring support is available for students who are
               struggling academically.
             </p>
           </div>
@@ -85,23 +77,16 @@ export default function AcademicsPage() {
       <section id="jss" className="section curriculum-section">
         <div className="container two-column">
           <div>
-            <span className="eyebrow eyebrow-light">Selected JSS curriculum</span>
-            <h2>JSS1 Agricultural Science topics.</h2>
-            <p>
-              These selected topics are transcribed from the curriculum material supplied by the College.
-            </p>
-            <div className="content-note">
-              The JSS1 Agricultural Science source file has been reported to contain Mathematics material. This
-              topic list remains marked for College confirmation and must not be treated as approved lesson content.
-            </div>
+            <span className="eyebrow eyebrow-light">Junior Secondary</span>
+            <h2>Curriculum information</h2>
+            <p>Contact Adebola College for the current subject-by-subject curriculum.</p>
           </div>
-          <ul className="curriculum-list">
-            {jssTopics.map((topic) => (
-              <li key={topic}>
-                {topic}
-              </li>
-            ))}
-          </ul>
+          <div className="info-panel info-panel-light">
+            <span className="eyebrow">Curriculum brochure</span>
+            <h3>Request current subject information</h3>
+            <p>Contact the College for its current Junior Secondary curriculum details.</p>
+            <ContactEmailLink className="text-link">Contact Adebola College</ContactEmailLink>
+          </div>
         </div>
       </section>
 
@@ -111,20 +96,19 @@ export default function AcademicsPage() {
             <span className="eyebrow">Senior Secondary</span>
             <h2 className="display-heading">Examination preparation.</h2>
             <p>
-              The supplied academic overview says students in the third year of Senior Secondary are prepared for
-              West African Examinations Council (WAEC) and National Examinations Council (NECO) examinations. The
-              curriculum document also refers to SSCE and UTME.
+              Students in the third year of Senior Secondary are prepared for West African Examinations Council
+              (WAEC) and National Examinations Council (NECO) examinations. The curriculum also refers to SSCE and UTME.
             </p>
             <p>Contact the College for the complete current subject and curriculum brochure.</p>
-            <a className="text-link" href="mailto:contactus@adebolacollege.org">
+            <ContactEmailLink className="text-link">
               Request curriculum information <span aria-hidden="true">→</span>
-            </a>
+            </ContactEmailLink>
           </div>
           <aside className="info-panel">
-            <span className="eyebrow">School-provided information</span>
+            <span className="eyebrow">Admissions</span>
             <h3>Transfer admissions</h3>
             <p>
-              The supplied content states that transferring students are expected to bring transcripts and evidence
+              Transferring students are expected to bring transcripts and evidence
               from previous schools. Contact Admissions to confirm current requirements.
             </p>
           </aside>
@@ -136,7 +120,7 @@ export default function AcademicsPage() {
           <div className="section-header">
             <span className="eyebrow">Curriculum brochure</span>
             <h2>Need the complete curriculum?</h2>
-            <p>The source document refers families to the College for the full curriculum brochure.</p>
+            <p>Contact the College for the full curriculum brochure.</p>
           </div>
           <Link href="/contact-us" className="btn btn-outline">Contact Adebola College</Link>
         </div>

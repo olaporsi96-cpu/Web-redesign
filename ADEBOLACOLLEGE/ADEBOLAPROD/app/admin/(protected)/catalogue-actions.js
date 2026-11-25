@@ -1,9 +1,12 @@
 'use server';
 
 import { createClient } from '../../../utils/supabase/server';
+import { createAdminClient } from '../../../utils/supabase/admin';
 import adminAuthorization from '../../../utils/admin-authorization.cjs';
 import supabaseError from '../../../utils/supabase-error.cjs';
 import accountArchiving from '../../../utils/account-archiving.cjs';
+import guestAccess from '../../../utils/guest-access.cjs';
+import { sendGuestCourseAccessLink, sendPendingOrderNotification } from '../../../utils/course-email';
 
 const {
   effectiveAdminPermissions,
@@ -82,7 +85,7 @@ export async function loadCourseAdminData() {
     }
     if (permissions.includes('manage_lessons') || permissions.includes('publish_unpublish_lessons')) {
       const { data: lessons, error } = await supabase.from('lessons')
-        .select('id,course_id,title,lesson_code,status,created_at,updated_at')
+        .select('id,course_id,title,lesson_code,description,duration_minutes,status,created_at,updated_at')
         .order('updated_at', { ascending: false });
       if (error) throw error;
       data.lessons = lessons;
@@ -133,12 +136,59 @@ export async function archiveCourseAction(id) {
   }
 }
 
+export async function deleteCourseAction(id) {
+  if (!/^[0-9a-f-]{36}$/i.test(id || '')) return { ok: false, error: 'The course is invalid.' };
+  try {
+    const { supabase } = await getAdminContext('manage_courses');
+    const { data: lessons, error: lessonError } = await supabase.from('lessons')
+      .select('id').eq('course_id', id);
+    if (lessonError) throw lessonError;
+    const lessonIds = (lessons || []).map((lesson) => lesson.id);
+    let materials = [];
+    if (lessonIds.length) {
+      const { data, error } = await supabase.from('course_materials')
+        .select('storage_path').in('lesson_id', lessonIds);
+      if (error) throw error;
+      materials = data || [];
+    }
+    const { data: orderCheck, error: orderError } = await supabase.from('course_orders')
+      .select('id').eq('course_id', id).limit(1);
+    if (orderError) throw orderError;
+    if (orderCheck?.length) throw new Error('The course cannot be deleted because payment history exists. Archive it instead.');
+    const { data: accessCheck, error: accessError } = await supabase.from('course_access')
+      .select('profile_id').eq('course_id', id).limit(1);
+    if (accessError) throw accessError;
+    if (accessCheck?.length) throw new Error('The course cannot be deleted because entitlement history exists. Archive it instead.');
+    const { data: guestCheck, error: guestError } = await supabase.from('course_guest_access')
+      .select('id').eq('course_id', id).limit(1);
+    if (guestError) throw guestError;
+    if (guestCheck?.length) throw new Error('The course cannot be deleted because guest entitlement history exists. Archive it instead.');
+    const { error } = await supabase.rpc('delete_course', { target_id: id });
+    if (error) throw error;
+    const paths = materials.map((material) => material.storage_path).filter(Boolean);
+    if (paths.length) {
+      const { error: removeError } = await supabase.storage.from('course-materials').remove(paths);
+      if (removeError) {
+        return { ok: true, warning: `Course records were deleted, but private files need Storage cleanup: ${removeError.message}` };
+      }
+    }
+    return { ok: true };
+  } catch (error) {
+    return failure(error, 'Deleting the course');
+  }
+}
+
 export async function saveLessonAction(lesson) {
   if (!lesson || typeof lesson !== 'object'
     || (lesson.id && !/^[0-9a-f-]{36}$/i.test(lesson.id))
     || !/^[0-9a-f-]{36}$/i.test(lesson.courseId || '')
     || typeof lesson.title !== 'string'
     || typeof lesson.code !== 'string'
+    || typeof lesson.description !== 'string'
+    || lesson.description.length > 5000
+    || (lesson.durationMinutes !== null && lesson.durationMinutes !== ''
+      && (!Number.isInteger(Number(lesson.durationMinutes))
+        || Number(lesson.durationMinutes) < 1 || Number(lesson.durationMinutes) > 600))
     || !['draft', 'published'].includes(lesson.status)) {
     return { ok: false, error: 'Check the selected course, lesson title, lesson code, and status.' };
   }
@@ -150,6 +200,9 @@ export async function saveLessonAction(lesson) {
       lesson_title: lesson.title,
       requested_lesson_code: lesson.code || null,
       requested_status: lesson.status,
+      lesson_description: lesson.description,
+      requested_duration_minutes: lesson.durationMinutes === '' || lesson.durationMinutes === null
+        ? null : Number(lesson.durationMinutes),
     });
     if (error) throw error;
     return { ok: true, id: data };
@@ -166,6 +219,27 @@ export async function archiveLessonAction(id) {
     return { ok: true };
   } catch (error) {
     return failure(error);
+  }
+}
+
+export async function deleteLessonAction(id) {
+  if (!/^[0-9a-f-]{36}$/i.test(id || '')) return { ok: false, error: 'The lesson is invalid.' };
+  try {
+    const { supabase } = await getAdminContext('manage_lessons');
+    const { data: material, error: materialError } = await supabase.from('course_materials')
+      .select('storage_path').eq('lesson_id', id).maybeSingle();
+    if (materialError) throw materialError;
+    const { error } = await supabase.rpc('delete_lesson', { target_lesson_id: id });
+    if (error) throw error;
+    if (material?.storage_path) {
+      const { error: removeError } = await supabase.storage.from('course-materials').remove([material.storage_path]);
+      if (removeError) {
+        return { ok: true, warning: `Lesson deleted, but its private file needs Storage cleanup: ${removeError.message}` };
+      }
+    }
+    return { ok: true };
+  } catch (error) {
+    return failure(error, 'Deleting the lesson');
   }
 }
 
@@ -285,16 +359,26 @@ export async function removeMaterialAction(lessonId) {
 export async function loadPaymentOrders() {
   try {
     const { supabase } = await getAdminContext('view_orders_payments');
-    const [orders, courses, access] = await Promise.all([
+    const [orders, courses, access, revocationHistory] = await Promise.all([
       supabase.from('course_orders')
-        .select('id,profile_id,buyer_name,buyer_email,course_id,amount,payment_reference,proof_path,status,decision_note,created_at')
+        .select('id,profile_id,buyer_name,buyer_email,course_id,amount,payment_reference,proof_path,status,decision_note,created_at,admin_email_sent_at,admin_email_error')
         .order('created_at', { ascending: false }),
       supabase.from('courses').select('id,title'),
-      supabase.from('course_access').select('profile_id,course_id,grant_source,granted_at').eq('grant_source', 'manual'),
+      supabase.from('course_access')
+        .select('profile_id,course_id,grant_source,granted_at,expires_at,revoked_at,revoked_by,revoked_reason,revocation_reason,order_id')
+        .order('granted_at', { ascending: false }),
+      supabase.from('course_access_revocation_history')
+        .select('profile_id,course_id,order_id,revoked_at,revoked_by,revocation_reason,reactivated_at,reactivated_by')
+        .order('reactivated_at', { ascending: false }),
     ]);
     if (orders.error) throw orders.error;
     if (courses.error) throw courses.error;
     if (access.error) throw access.error;
+    if (revocationHistory.error) throw revocationHistory.error;
+    const { data: guestAccess, error: guestAccessError } = await supabase.from('course_guest_access')
+      .select('id,order_id,course_id,buyer_email,granted_at,expires_at,revoked_at,revoked_by,revoked_reason,revocation_reason,access_email_sent_at,access_email_error')
+      .order('granted_at', { ascending: false });
+    if (guestAccessError) throw guestAccessError;
     const { data: canViewStudents, error: studentPermissionError } = await supabase.rpc('has_admin_permission', {
       required_permission: 'view_students',
     });
@@ -316,23 +400,163 @@ export async function loadPaymentOrders() {
       return [order.id, data.signedUrl];
     }));
     return { ok: true, data: { orders: orders.data, courses: courses.data, students, canViewStudents,
-      manualAccess: access.data, proofUrls: Object.fromEntries(proofUrls) } };
+      studentAccess: access.data, revocationHistory: revocationHistory.data, guestAccess, proofUrls: Object.fromEntries(proofUrls) } };
   } catch (error) {
     return failure(error);
   }
 }
 
-export async function reviewPaymentOrderAction(id, approve, note, linkedProfileId = null) {
+export async function reviewPaymentOrderAction(id, approve, note = '') {
+  let reviewCompleted = false;
   try {
     const { supabase } = await getAdminContext('view_orders_payments');
+    const { data: order, error: orderError } = await supabase.from('course_orders')
+      .select('profile_id,buyer_email,course_id').eq('id', id).maybeSingle();
+    if (orderError) throw orderError;
+    if (!order) throw new Error('Payment order was not found.');
+    const token = approve && !order.profile_id ? guestAccess.createGuestAccessToken() : null;
     const { error } = await supabase.rpc('review_course_order', {
       target_order_id: id, approve_order: approve, review_note: note || '',
-      linked_profile_id: linkedProfileId,
+      linked_profile_id: null,
+      guest_token_hash: token ? guestAccess.hashGuestAccessToken(token) : null,
+    });
+    if (error) throw error;
+    reviewCompleted = true;
+    if (!token) return { ok: true };
+
+    try {
+      const admin = createAdminClient();
+      const { data: entitlement, error: entitlementError } = await admin.from('course_guest_access')
+        .select('id,buyer_email,course_id').eq('order_id', id).maybeSingle();
+      if (entitlementError || !entitlement) {
+        return { ok: true, emailError: 'The guest entitlement was created, but its email details could not be loaded.' };
+      }
+      const { data: course, error: courseError } = await admin.from('courses')
+        .select('title').eq('id', entitlement.course_id).maybeSingle();
+      if (courseError || !course) {
+        return { ok: true, emailError: 'The guest entitlement was created, but its course details could not be loaded.' };
+      }
+      const delivery = await sendGuestCourseAccessLink(entitlement.buyer_email, course.title, token);
+      const update = delivery.ok
+        ? { access_email_sent_at: new Date().toISOString(), access_email_error: null }
+        : { access_email_sent_at: null, access_email_error: delivery.error.slice(0, 1000) };
+      const { error: statusError } = await admin.from('course_guest_access').update(update).eq('id', entitlement.id);
+      const emailError = delivery.ok
+        ? (statusError ? 'The guest access email was sent, but its delivery status could not be saved.' : '')
+        : `${delivery.error}${statusError ? ' Delivery status could not be saved.' : ''}`;
+      return emailError ? { ok: true, emailError } : { ok: true };
+    } catch {
+      return { ok: true, emailError: 'The guest entitlement was created, but its access email could not be completed. Retry the link from Orders and Payments.' };
+    }
+  } catch (error) {
+    if (reviewCompleted) {
+      return { ok: true, emailError: 'The order was reviewed, but its email notification could not be completed.' };
+    }
+    return failure(error);
+  }
+}
+
+export async function retryOrderAdminEmailAction(orderId) {
+  try {
+    await getAdminContext('view_orders_payments');
+    const admin = createAdminClient();
+    const result = await sendPendingOrderNotification(admin, orderId);
+    const update = result.ok
+      ? { admin_email_sent_at: new Date().toISOString(), admin_email_error: null }
+      : { admin_email_sent_at: null, admin_email_error: result.error.slice(0, 1000) };
+    const { error } = await admin.from('course_orders').update(update).eq('id', orderId);
+    if (error) throw error;
+    if (!result.ok) return { ok: false, error: result.error };
+    return { ok: true };
+  } catch (error) {
+    return failure(error, 'Retrying the Admin email notification');
+  }
+}
+
+export async function retryGuestCourseAccessEmailAction(guestAccessId) {
+  try {
+    const { supabase } = await getAdminContext('view_orders_payments');
+    const { data: entitlement, error: entitlementError } = await supabase.from('course_guest_access')
+      .select('id,buyer_email,course_id,revoked_at,expires_at')
+      .eq('id', guestAccessId).maybeSingle();
+    if (entitlementError) throw entitlementError;
+    if (!entitlement || entitlement.revoked_at) throw new Error('Active guest course access was not found.');
+
+    const { data: course, error: courseError } = await supabase.from('courses')
+      .select('title').eq('id', entitlement.course_id).maybeSingle();
+    if (courseError) throw courseError;
+    if (!course) throw new Error('The guest course was not found.');
+
+    const token = guestAccess.createGuestAccessToken();
+    const { error: rotateError } = await supabase.rpc('admin_rotate_guest_course_access_token', {
+      target_guest_access_id: entitlement.id,
+      replacement_token_hash: guestAccess.hashGuestAccessToken(token),
+    });
+    if (rotateError) throw rotateError;
+
+    let delivery;
+    try {
+      delivery = await sendGuestCourseAccessLink(entitlement.buyer_email, course.title, token);
+    } catch {
+      delivery = { ok: false, error: 'The access link was rotated, but email delivery could not be completed.' };
+    }
+    const admin = createAdminClient();
+    const update = delivery.ok
+      ? { access_email_sent_at: new Date().toISOString(), access_email_error: null }
+      : { access_email_sent_at: null, access_email_error: delivery.error.slice(0, 1000) };
+    const { error: statusError } = await admin.from('course_guest_access').update(update).eq('id', entitlement.id);
+    if (statusError) {
+      return { ok: false, error: delivery.ok
+        ? 'The new access email was sent, but its delivery status could not be saved.'
+        : `${delivery.error} Delivery status could not be saved.` };
+    }
+    if (!delivery.ok) return { ok: false, error: delivery.error };
+    return { ok: true };
+  } catch (error) {
+    return failure(error, 'Resending the guest course-access link');
+  }
+}
+
+export async function revokePaidCourseAccessAction(profileId, courseId, reason = '') {
+  try {
+    const { supabase } = await getAdminContext('view_orders_payments');
+    const { error } = await supabase.rpc('admin_revoke_course_access', {
+      target_profile_id: profileId,
+      target_course_id: courseId,
+      revoke_reason: reason,
     });
     if (error) throw error;
     return { ok: true };
   } catch (error) {
-    return failure(error);
+    return failure(error, 'Revoking payment-approved course access');
+  }
+}
+
+export async function revokeGuestCourseAccessAction(guestAccessId, reason = '') {
+  try {
+    const { supabase } = await getAdminContext('view_orders_payments');
+    const { error } = await supabase.rpc('admin_revoke_guest_course_access', {
+      target_guest_access_id: guestAccessId,
+      revoke_reason: reason,
+    });
+    if (error) throw error;
+    return { ok: true };
+  } catch (error) {
+    return failure(error, 'Revoking guest course access');
+  }
+}
+
+export async function revokeAllCourseAccessAction(courseId, reason = '') {
+  try {
+    const { supabase } = await getAdminContext('view_orders_payments');
+    const { data, error } = await supabase.rpc('admin_revoke_all_course_entitlements', {
+      target_course_id: courseId,
+      revoke_reason: reason,
+    });
+    if (error) throw error;
+    return { ok: true, count: Number(data || 0) };
+  } catch (error) {
+    return failure(error, 'Revoking all course access');
   }
 }
 
@@ -349,12 +573,13 @@ export async function manuallyGrantAccessAction(profileId, courseId) {
   }
 }
 
-export async function revokeManualAccessAction(profileId, courseId) {
+export async function revokeManualAccessAction(profileId, courseId, reason = '') {
   try {
     const { supabase } = await getAdminContext('view_orders_payments');
     const { error } = await supabase.rpc('revoke_manual_course_access', {
       target_profile_id: profileId,
       target_course_id: courseId,
+      revoke_reason: reason,
     });
     if (error) throw error;
     return { ok: true };

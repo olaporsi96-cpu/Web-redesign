@@ -18,6 +18,7 @@ export default function AdminDashboardPage() {
     ...(canAdmin('manage_course_materials') ? [{ href: '/admin/materials', label: 'Course materials' }] : []),
     ...(canAdmin('view_orders_payments') ? [{ href: '/admin/orders', label: 'Orders and payments' }] : []),
     ...(canAdmin('manage_catalogue_settings') ? [{ href: '/admin/settings', label: 'Catalogue and bank settings' }] : []),
+    ...(adminProfile.role === 'main_admin' ? [{ href: '/admin/website-settings', label: 'Website settings' }] : []),
     ...(adminProfile.role === 'main_admin' ? [{ href: '/admin/media', label: 'E-Learning feature video' }] : []),
     ...(adminProfile.role === 'main_admin' ? [{ href: '/admin/calendar', label: 'School calendar' }] : []),
     ...(adminProfile.role === 'main_admin' ? [{ href: '/admin/users', label: 'Sub-Admin accounts' }] : []),

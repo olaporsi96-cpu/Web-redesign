@@ -59,7 +59,7 @@ export default function ResultSlip({ student, result }) {
       <footer className="result-slip-footer">
         <strong>Adebola College</strong>
         <span>contactus@adebolacollege.org</span>
-        <span>e-learning@adebolacollege.org</span>
+        <span>elearning@adebolacollege.org</span>
         <small>Scores, grades, and remarks are entered as supplied and are not calculated by the portal.</small>
       </footer>
     </article>

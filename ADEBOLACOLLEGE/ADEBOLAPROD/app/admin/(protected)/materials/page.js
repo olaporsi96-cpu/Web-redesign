@@ -56,7 +56,7 @@ export default function MaterialsPage() {
       return;
     }
     if (selected?.previewUrl) URL.revokeObjectURL(selected.previewUrl);
-    setSelected({ lesson, file, previewUrl: file.type === 'video/mp4' || extension === 'mp4' ? URL.createObjectURL(file) : '' });
+    setSelected({ lesson, file, previewUrl: URL.createObjectURL(file) });
     setError('');
   }
 
@@ -115,16 +115,19 @@ export default function MaterialsPage() {
             <thead><tr><th>Lesson</th><th>Course</th><th>File</th><th>Actions</th></tr></thead>
             <tbody>{lessons.map((lesson) => {
               const material = materials.find((item) => item.lesson_id === lesson.id);
+              const fileInputId = `material-file-${lesson.id}`;
               return <tr key={lesson.id}>
                 <td><strong>{lesson.title}</strong></td>
                 <td>{courses.find((item) => item.id === lesson.course_id)?.title || 'Unavailable'}</td>
                 <td>{material ? `${material.file_name} (${material.mime_type})` : 'No material uploaded'}</td>
                 <td><div className="row-actions">
-                  <label className="text-button file-action">
+                  <input id={fileInputId} className="file-picker-input" type="file" accept="application/pdf,video/mp4,.pdf,.mp4" disabled={Boolean(busy)} onChange={(event) => chooseFile(lesson, event)} aria-label={`Select private PDF or video material for ${lesson.title}`} />
+                  <label htmlFor={fileInputId} className="text-button file-action-label">
                     {selected?.lesson.id === lesson.id ? 'Change selection' : material ? 'Replace' : 'Select file'}
-                    <input type="file" accept="application/pdf,video/mp4,.pdf,.mp4" disabled={Boolean(busy)} onChange={(event) => chooseFile(lesson, event)} aria-label={`Select private PDF or video material for ${lesson.title}`} />
                   </label>
-                  {material && <button type="button" className="text-button text-danger" onClick={() => setRemoving(material)}>Remove</button>}
+                  {material && <button type="button" className="text-button text-danger" onClick={() => setRemoving(material)}>
+                    {material.mime_type === 'video/mp4' ? 'Delete video' : 'Delete file'}
+                  </button>}
                 </div></td>
               </tr>;
             })}</tbody>
@@ -133,9 +136,9 @@ export default function MaterialsPage() {
         {selected && (
           <div className="material-upload-preview">
             <p><strong>{selected.lesson.title}</strong> · {selected.file.name} · {(selected.file.size / (1024 * 1024)).toFixed(1)} MB</p>
-            {selected.previewUrl
-              ? <video className="material-video-preview" controls preload="metadata" src={selected.previewUrl}>Your browser does not support video playback.</video>
-              : <p>PDF selected. It will remain private and available only to learners with course access.</p>}
+            {extensionOf(selected.file.name) === 'pdf'
+              ? <iframe title={`Preview of ${selected.file.name}`} className="material-document-preview" src={selected.previewUrl} />
+              : <video className="material-video-preview" controls preload="metadata" src={selected.previewUrl}>Your browser does not support video playback.</video>}
             {busy && <progress className="upload-progress" aria-label="Course material upload in progress" />}
             <button type="button" className="admin-button button-primary" disabled={Boolean(busy)} onClick={uploadSelected}>
               {busy ? 'Uploading…' : 'Upload selected material'}
@@ -143,7 +146,13 @@ export default function MaterialsPage() {
           </div>
         )}
       </section>
-      {removing && <ConfirmDialog title="Remove lesson material?" description={`Remove the private file “${removing.file_name}”? Learners will no longer be able to open it.`} confirmLabel="Remove material" onCancel={() => setRemoving(null)} onConfirm={remove} />}
+      {removing && <ConfirmDialog
+        title={removing.mime_type === 'video/mp4' ? 'Delete lesson video?' : 'Delete lesson file?'}
+        description={`Delete the private file “${removing.file_name}”? Learners will no longer be able to open it.`}
+        confirmLabel={removing.mime_type === 'video/mp4' ? 'Delete video' : 'Delete file'}
+        onCancel={() => setRemoving(null)}
+        onConfirm={remove}
+      />}
       <Toast message={toast} onDismiss={() => setToast('')} />
     </>
   );

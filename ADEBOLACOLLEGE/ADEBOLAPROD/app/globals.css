@@ -337,7 +337,7 @@ button, input, textarea, select { font: inherit; }
 }
 .cta-band {
   margin: 0 auto 5rem;
-  background: linear-gradient(135deg, rgba(16,31,66,0.96), rgba(22,62,161,0.96));
+  background: linear-gradient(135deg, #0b1832, #10244a);
   border-radius: 28px;
   color: white;
   padding: 2rem 2.2rem;
@@ -436,12 +436,32 @@ button, input, textarea, select { font: inherit; }
   display: grid;
   gap: 1rem;
 }
+.faq-navigation {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem 1rem;
+  margin: 0 0 1.2rem;
+}
+.faq-navigation a { color: var(--blue); font-weight: 700; }
 .faq-item {
+  scroll-margin-top: 6rem;
   background: rgba(255,255,255,0.86);
   border: 1px solid var(--line);
   border-radius: 16px;
   padding: 1.1rem 1.2rem;
 }
+.faq-item p { margin: 0; }
+.guest-lesson-list {
+  width: 100%;
+  display: grid;
+  gap: 0.9rem;
+  margin: 0;
+  padding: 1.2rem 1.2rem 1.2rem 2.8rem;
+  color: var(--text);
+  text-align: left;
+}
+.guest-lesson-list li { padding-left: 0.25rem; }
+.guest-lesson-list a { color: #a9c5ff; font-weight: 700; }
 .faq-item h3 {
   margin: 0 0 0.3rem;
   color: var(--navy);
@@ -869,6 +889,9 @@ button, input, textarea, select { font: inherit; }
 .curriculum-section > .container > div > p {
   color: rgba(255,255,255,0.76);
 }
+.pathways-section,
+.statement-section { background: #0b1832; }
+.statement-section p { color: rgba(255,255,255,0.88); }
 
 .pathway-grid,
 .category-grid {
@@ -1693,3 +1716,4 @@ button, input, textarea, select { font: inherit; }
   :root:not([data-theme='light']):not([data-theme='dark']) .result-slip { border-color: #405748; border-top-color: #39956b; color: #e4ede7; background: #17251e; }
   :root:not([data-theme='light']):not([data-theme='dark']) :is(.result-slip-header, .result-slip-details, .result-slip-details > div, .result-slip-status, .result-subject-table th, .result-subject-table td) { border-color: #405748; }
 }
+.website-hero-image-preview { display: block; width: min(100%, 900px); max-height: 55vh; object-fit: contain; border: 1px solid var(--line); border-radius: 10px; background: #f5f7fb; }

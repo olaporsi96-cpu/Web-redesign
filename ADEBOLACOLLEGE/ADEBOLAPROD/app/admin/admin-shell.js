@@ -20,6 +20,7 @@ const navigation = [
   { label: 'Results', href: '/admin/results', icon: '▦', permission: 'manage_results' },
   { label: 'Orders and Payments', href: '/admin/orders', icon: '◷', permission: 'view_orders_payments' },
   { label: 'Catalogue settings', href: '/admin/settings', icon: '⚙', permission: 'manage_catalogue_settings' },
+  { label: 'Website settings', href: '/admin/website-settings', icon: '⌂', permission: 'manage_admin_users', mainAdminOnly: true },
   { label: 'E-Learning video', href: '/admin/media', icon: '▶', permission: 'manage_admin_users', mainAdminOnly: true },
   { label: 'School calendar', href: '/admin/calendar', icon: '▦', permission: 'manage_admin_users', mainAdminOnly: true },
   { label: 'Admin users', href: '/admin/users', icon: '♙', permission: 'manage_admin_users', mainAdminOnly: true },
@@ -109,6 +110,11 @@ export function AdminShell({ children }) {
               >
                 <span className="admin-nav-icon" aria-hidden="true">{item.icon}</span>
                 <span>{item.label}</span>
+                {item.href === '/admin/orders' && adminProfile.pendingOrderCount > 0 && (
+                  <span className="admin-nav-count" aria-label={`${adminProfile.pendingOrderCount} pending orders`}>
+                    {adminProfile.pendingOrderCount > 99 ? '99+' : adminProfile.pendingOrderCount}
+                  </span>
+                )}
               </Link>
             );
           })}

@@ -285,7 +285,7 @@ The access-expiry policy is not specified in the supplied requirements. Recommen
 | Course access granted | Beneficiary student | Payer/guardian as permitted | No routine notice |
 | Lesson completion | Student's verified email | Optional linked guardian notice only with explicit policy/consent | No routine notification |
 
-Proposed school operational recipient for E-Learning events: `e-learning@adebolacollege.org`; `adebolacollege@gmail.com` may be a monitored fallback only if the client confirms its use and access controls. Public-school contact candidates supplied are `contactus@adebolacollege.org` and a Gmail address whose intended spelling is ambiguous in the supplied text; confirm the exact address before using it. Configure a separate verified sender address/domain; do not assume these recipient addresses are authorized senders.
+The E-Learning contact address is `elearning@adebolacollege.org`. Configure any transactional-email recipient explicitly and use a separate verified sender address/domain; do not assume a recipient address is an authorized sender.
 
 ### Reliability and privacy
 

@@ -69,6 +69,14 @@
 .catalogue-lesson-list a { color: #2456ba; font-weight: 700; text-decoration: underline; text-decoration-color: transparent; text-underline-offset: 0.16em; }
 .catalogue-lesson-list a:hover,
 .catalogue-lesson-list a:focus-visible { text-decoration-color: currentColor; }
+.catalogue-lesson-list li { display: grid; grid-template-columns: min-content minmax(0, 1fr) auto; align-items: baseline; gap: 0.3rem 0.5rem; }
+.catalogue-lesson-duration { color: var(--muted); font-size: 0.72rem; white-space: nowrap; }
+.catalogue-lesson-details { grid-column: 1 / -1; }
+.catalogue-lesson-details summary { color: #2456ba; cursor: pointer; font-weight: 700; }
+.catalogue-lesson-details p { margin: 0.35rem 0 0; color: var(--muted); white-space: pre-line; }
+.lesson-viewer-heading .lesson-detail-text { margin: 0.8rem 0 0; white-space: pre-line; }
+.guest-lesson-list li { display: grid; gap: 0.25rem; }
+.guest-lesson-list li > span { color: #c4cee1; font-size: 0.75rem; }
 .catalogue-order-backdrop { position: fixed; inset: 0; z-index: 1000; display: grid; place-items: center; padding: 1rem; background: rgba(15, 27, 49, 0.62); }
 .catalogue-order-dialog { position: relative; width: min(560px, 100%); max-height: 90vh; overflow-y: auto; padding: 1.5rem; border-radius: 16px; background: #fff; box-shadow: 0 24px 70px rgba(0,0,0,0.25); }
 .catalogue-order-dialog > .icon-button { position: absolute; top: 0.7rem; right: 0.7rem; }

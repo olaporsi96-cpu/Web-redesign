@@ -1,17 +1,18 @@
 import Link from 'next/link';
+import ContactEmailLink from '../../components/contact-email-link';
 
 const waysToHelp = [
   {
     title: 'School volunteering',
-    text: 'The supplied family information says volunteer services are coordinated by the College Administrative Office.',
+    text: 'Volunteer services are coordinated by the College Administrative Office.',
   },
   {
     title: 'Share time and skills',
-    text: 'Parents are invited in the supplied content to ask about volunteering as unpaid substitute teachers or sharing life skills.',
+    text: 'Parents can ask about volunteering as unpaid substitute teachers or sharing life skills.',
   },
   {
     title: 'Community involvement',
-    text: 'The source also encourages students to volunteer in the community.',
+    text: 'Students are encouraged to volunteer in their communities.',
   },
 ];
 
@@ -24,8 +25,7 @@ export default function FamiliesPage() {
             <span className="eyebrow eyebrow-light">Families</span>
             <h1>Working together in support of students.</h1>
             <p>
-              Adebola College’s supplied family information welcomes parent support and encourages students to
-              contribute to their communities.
+              Adebola College welcomes parent support and encourages students to contribute to their communities.
             </p>
             <div className="hero-actions">
               <Link href="/contact-us" className="btn btn-primary">Contact the College</Link>
@@ -34,7 +34,7 @@ export default function FamiliesPage() {
           </div>
           <div className="hero-statement">
             <p>Family partnership<br />Student support</p>
-            <span className="hero-statement-caption">Based on supplied family information</span>
+            <span className="hero-statement-caption">Adebola College families</span>
           </div>
         </div>
       </section>
@@ -45,8 +45,7 @@ export default function FamiliesPage() {
             <span className="eyebrow">Family support</span>
             <h2>Ways families can take part.</h2>
             <p>
-              The supplied content asks parents to encourage appropriate dress and conduct in and outside the school
-              premises. Contact the College for current family guidance.
+              Parents are encouraged to support appropriate dress and conduct in and outside the school premises.
             </p>
           </div>
           <div className="card-grid">
@@ -66,18 +65,15 @@ export default function FamiliesPage() {
             <span className="eyebrow eyebrow-light">Volunteering</span>
             <h2>Share your time, energy, and skills.</h2>
             <p>
-              Volunteer services are described in the supplied material as coordinated by the Administrative Office.
-              Parents interested in volunteering should contact the College to confirm current opportunities and
-              arrangements.
+              Volunteer services are coordinated by the Administrative Office. Parents interested in volunteering
+              can contact the College about current opportunities and arrangements.
             </p>
           </div>
           <div className="info-panel info-panel-light">
             <span className="eyebrow">Students and community</span>
             <h3>Ask about student volunteering.</h3>
-            <p>The school content encourages students to volunteer in their communities.</p>
-            <a className="text-link" href="mailto:contactus@adebolacollege.org">
-              contactus@adebolacollege.org <span aria-hidden="true">→</span>
-            </a>
+            <p>Students are encouraged to volunteer in their communities.</p>
+            <ContactEmailLink className="text-link">Contact the College <span aria-hidden="true">→</span></ContactEmailLink>
           </div>
         </div>
       </section>
@@ -88,9 +84,8 @@ export default function FamiliesPage() {
             <span className="eyebrow">Supporting the College</span>
             <h2 className="display-heading">Ask about approved ways to help.</h2>
             <p>
-              The supplied content mentions donations and support such as school books, science-lab equipment, and
-              vehicles. Banking details are not displayed on this page. Contact the College directly to verify current
-              needs and approved arrangements.
+              Families can ask about supporting the College with school books, science-lab equipment, and vehicles.
+              Contact the College to discuss current needs and arrangements.
             </p>
           </div>
           <div className="contact-card contact-card-emphasis">

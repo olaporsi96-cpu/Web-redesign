@@ -25,9 +25,13 @@ const slides = [
   },
 ];
 
-export default function HomeSpotlight() {
+export default function HomeSpotlight({ title, description }) {
   const [activeIndex, setActiveIndex] = useState(0);
-  const slide = slides[activeIndex];
+  const messages = [
+    { title: title || slides[0].title, description: description || slides[0].description },
+    ...slides.slice(1),
+  ];
+  const slide = messages[activeIndex];
 
   function moveBy(offset) {
     setActiveIndex((current) => (current + offset + slides.length) % slides.length);
@@ -40,7 +44,7 @@ export default function HomeSpotlight() {
       <div className="spotlight-controls" aria-label="Homepage messages">
         <button type="button" aria-label="Previous message" onClick={() => moveBy(-1)}>←</button>
         <div className="spotlight-dots">
-          {slides.map((item, index) => (
+          {messages.map((item, index) => (
             <button
               type="button"
               key={item.title}

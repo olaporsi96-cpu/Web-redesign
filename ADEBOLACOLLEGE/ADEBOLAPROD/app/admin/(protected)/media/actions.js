@@ -55,3 +55,42 @@ export async function saveEducationalVideo({ path, fileName, published }) {
     return { ok: false, error: error instanceof Error ? error.message : 'Unable to save the educational video.' };
   }
 }
+
+export async function deleteEducationalVideo() {
+  try {
+    const { supabase, user } = await getMainAdmin();
+    const { data: current, error: loadError } = await supabase.from('elearning_feature_settings')
+      .select('video_path,video_file_name,published').eq('id', true).maybeSingle();
+    if (loadError) throw loadError;
+    if (!current?.video_path) return { ok: true, warning: '' };
+
+    const { error: clearError } = await supabase.from('elearning_feature_settings').update({
+      video_path: null,
+      video_file_name: null,
+      published: false,
+      updated_by: user.id,
+      updated_at: new Date().toISOString(),
+    }).eq('id', true);
+    if (clearError) throw clearError;
+
+    const { error: removeError } = await supabase.storage.from('elearning-public-media').remove([current.video_path]);
+    if (!removeError) return { ok: true, warning: '' };
+
+    const { error: restoreError } = await supabase.from('elearning_feature_settings').update({
+      video_path: current.video_path,
+      video_file_name: current.video_file_name,
+      published: current.published,
+      updated_by: user.id,
+      updated_at: new Date().toISOString(),
+    }).eq('id', true);
+    if (restoreError) {
+      return {
+        ok: false,
+        error: `The video metadata was cleared, but its storage object could not be removed or restored: ${removeError.message}; ${restoreError.message}`,
+      };
+    }
+    return { ok: false, error: `The video could not be removed. Its previous settings were restored: ${removeError.message}` };
+  } catch (error) {
+    return { ok: false, error: error instanceof Error ? error.message : 'Unable to delete the educational video.' };
+  }
+}
