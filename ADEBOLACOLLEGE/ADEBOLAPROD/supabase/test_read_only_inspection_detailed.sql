@@ -130,6 +130,7 @@ with required_functions(signature) as (
     ('public.archive_lesson(uuid)'),
     ('public.save_course_catalogue_settings(jsonb)'),
     ('public.save_course_payment_settings(text,text,text)'),
+    ('public.save_course_payment_settings(text,text,text,text)'),
     ('public.save_course_material(uuid,text,text,text)'),
     ('public.remove_course_material(uuid)'),
     ('public.submit_course_order(uuid,text,text)'),
