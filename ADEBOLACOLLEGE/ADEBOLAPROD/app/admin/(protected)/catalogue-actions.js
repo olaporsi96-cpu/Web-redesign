@@ -193,7 +193,8 @@ export async function loadCatalogueSettings() {
       supabase.from('course_catalogue_settings')
         .select('category,code_prefix,code_start,code_end'),
       supabase.from('course_payment_settings')
-        .select('bank_name,account_name,account_number').eq('id', true).maybeSingle(),
+        .select('bank_name,account_name,account_number,account_type')
+        .order('updated_at', { ascending: false }).limit(1).maybeSingle(),
     ]);
     if (categories.error) throw categories.error;
     if (payments.error) throw payments.error;
@@ -214,6 +215,7 @@ export async function saveCatalogueSettingsAction(settings, payments) {
         configured_bank: payments.bankName || null,
         configured_account_name: payments.accountName || null,
         configured_account_number: payments.accountNumber || null,
+        configured_account_type: payments.accountType || null,
       }),
     ]);
     if (categoryResult.error) throw categoryResult.error;
