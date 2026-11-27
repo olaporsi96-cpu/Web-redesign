@@ -4,7 +4,7 @@ import { randomUUID } from 'node:crypto';
 import { createClient } from '../../utils/supabase/server';
 import { createAdminClient } from '../../utils/supabase/admin';
 import guestAccess from '../../utils/guest-access.cjs';
-import { sendPendingOrderNotification } from '../../utils/course-email';
+import { sendBuyerOrderConfirmation, sendPendingOrderNotification } from '../../utils/course-email';
 
 const PROOF_BUCKET = 'course-payment-proofs';
 const { isAllowedReceiptSize, isAllowedReceiptType, isValidEmail, matchesReceiptSignature } = guestAccess;
@@ -46,7 +46,15 @@ async function cleanUnsubmittedGuestProof(admin, path) {
 }
 
 async function notifyAdminOfOrder(admin, orderId) {
-  const sendResult = await sendPendingOrderNotification(admin, orderId);
+  let sendResult;
+  try {
+    sendResult = await sendPendingOrderNotification(admin, orderId);
+  } catch (error) {
+    sendResult = {
+      ok: false,
+      error: error instanceof Error ? error.message : 'The Admin email could not be sent.',
+    };
+  }
   const status = sendResult.ok
     ? { admin_email_sent_at: new Date().toISOString(), admin_email_error: null }
     : { admin_email_sent_at: null, admin_email_error: sendResult.error.slice(0, 1000) };
@@ -57,6 +65,58 @@ async function notifyAdminOfOrder(admin, orderId) {
       : `${sendResult.error} Delivery status could not be saved.`;
   }
   return sendResult.ok ? '' : sendResult.error;
+}
+
+async function notifyBuyerOfOrder(admin, orderId, fallbackEmail = '') {
+  const saveStatus = async (sent, message) => {
+    const { error } = await admin.from('course_orders').update({
+      buyer_email_sent_at: sent ? new Date().toISOString() : null,
+      buyer_email_error: message ? message.slice(0, 1000) : null,
+    }).eq('id', orderId);
+    if (error) {
+      return message
+        ? `${message} Buyer email status could not be saved.`
+        : 'The buyer confirmation was sent, but its delivery status could not be saved.';
+    }
+    return message;
+  };
+
+  const { data: order, error } = await admin.from('course_orders')
+    .select('buyer_email,profile_id,amount,payment_reference,course_id')
+    .eq('id', orderId).maybeSingle();
+  if (error || !order) {
+    return saveStatus(false, 'The order was saved, but buyer email details could not be loaded.');
+  }
+  let buyerEmail = order.buyer_email || fallbackEmail;
+  if (!buyerEmail && order.profile_id) {
+    const { data: userLookup, error: userError } = await admin.auth.admin.getUserById(order.profile_id);
+    if (userError) return saveStatus(false, 'The order was saved, but the buyer account email could not be loaded.');
+    buyerEmail = userLookup?.user?.email || '';
+  }
+  if (!buyerEmail) {
+    return saveStatus(false, 'The order was saved, but the buyer email address was unavailable.');
+  }
+  const { data: course, error: courseError } = await admin.from('courses')
+    .select('title').eq('id', order.course_id).maybeSingle();
+  if (courseError || !course) {
+    return saveStatus(false, 'The order was saved, but course email details could not be loaded.');
+  }
+
+  let delivery;
+  try {
+    delivery = await sendBuyerOrderConfirmation(
+      buyerEmail,
+      course.title,
+      order.amount,
+      order.payment_reference,
+    );
+  } catch (deliveryError) {
+    delivery = {
+      ok: false,
+      error: deliveryError instanceof Error ? deliveryError.message : 'Buyer email delivery failed.',
+    };
+  }
+  return saveStatus(delivery.ok, delivery.ok ? '' : delivery.error);
 }
 
 export async function createGuestProofUpload(fileName, mimeType, size) {
@@ -111,6 +171,9 @@ export async function submitCourseOrder(courseId, reference, proofPath) {
     let notificationError = '';
     try {
       notificationError = await notifyAdminOfOrder(admin, data);
+      const buyerEmailError = await notifyBuyerOfOrder(admin, data, user.email);
+      if (!notificationError) notificationError = buyerEmailError;
+      else if (buyerEmailError) notificationError = `${notificationError} ${buyerEmailError}`;
     } catch {
       notificationError = 'The order was saved, but its Admin email notification could not be completed.';
     }
@@ -154,6 +217,9 @@ export async function submitGuestCourseOrder(courseId, name, email, reference, p
     let notificationError = '';
     try {
       notificationError = await notifyAdminOfOrder(admin, data);
+      const buyerEmailError = await notifyBuyerOfOrder(admin, data, email.trim());
+      if (!notificationError) notificationError = buyerEmailError;
+      else if (buyerEmailError) notificationError = `${notificationError} ${buyerEmailError}`;
     } catch {
       notificationError = 'The order was saved, but its Admin email notification could not be completed.';
     }

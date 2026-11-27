@@ -14,6 +14,7 @@ test('Supabase migration runner contains unique migration versions and no prefli
   assert.equal(files.some((name) => /preflight/i.test(name)), false);
   assert.equal(files.includes('20261124000100_security_and_settings.sql'), true);
   assert.equal(files.includes('20261123000100_guest_course_entitlements_and_expiry.sql'), true);
+  assert.equal(files.includes('20261125000200_course_lesson_metadata_alignment.sql'), true);
 });
 
 test('read-only preflight is outside the migration runner', () => {
@@ -39,6 +40,15 @@ test('revocation combines student and guest updates atomically and preserves rep
   assert.match(migration, /and \(ca\.expires_at is null or ca\.expires_at > now\(\)\)/i);
   assert.match(migration, /OLD\.grant_source = 'approved_order'[\s\S]*NEW\.order_id is distinct from OLD\.order_id/i);
   assert.match(migration, /create or replace function public\.save_course_payment_settings\(\s*configured_bank text,\s*configured_account_name text,\s*configured_account_number text\s*\)/i);
-  assert.match(migration, /delete from public\.course_payment_settings where id = true/i);
-  assert.match(migration, /account_type = \(select s\.account_type/i);
+  assert.match(migration, /declare target_row tid/i);
+  assert.match(migration, /where ctid = target_row/i);
+  assert.doesNotMatch(migration, /id\s*=\s*true|delete from public\.course_payment_settings where id\s*=/i);
+
+  const uuidSafeMigration = fs.readFileSync(path.join(
+    migrationsDir,
+    '20261125000100_uuid_safe_course_payment_settings.sql',
+  ), 'utf8');
+  assert.match(uuidSafeMigration, /effective_account_type := nullif\(btrim\(configured_account_type\), ''\)/i);
+  assert.match(uuidSafeMigration, /effective_account_type := nullif\(btrim\(existing_account_type\), ''\)/i);
+  assert.match(uuidSafeMigration, /account_type = effective_account_type/i);
 });

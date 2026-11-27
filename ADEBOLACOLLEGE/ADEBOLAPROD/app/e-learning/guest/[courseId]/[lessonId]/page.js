@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { getGuestCourseAccess } from '../../../../../utils/guest-course-access';
+import CourseMaterialViewer from '../../../../../components/course-material-viewer';
 
 export const dynamic = 'force-dynamic';
 
@@ -16,22 +17,28 @@ export default async function GuestLessonPage({ params }) {
   const [lessonResult, courseResult] = await Promise.all([
     access.admin.from('lessons').select('id,course_id,title,lesson_code,description,duration_minutes')
       .eq('id', lessonId).eq('course_id', courseId).eq('status', 'published').maybeSingle(),
-    access.admin.from('courses').select('title,category').eq('id', courseId).maybeSingle(),
+    access.admin.from('courses').select('title,category').eq('id', courseId)
+      .eq('status', 'published').maybeSingle(),
   ]);
   if (lessonResult.error || courseResult.error || !lessonResult.data || !courseResult.data) {
     return <GuestLessonMessage title="Lesson temporarily unavailable" />;
   }
 
-  const { data: material, error: materialError } = await access.admin.from('course_materials')
-    .select('storage_path,file_name,mime_type').eq('lesson_id', lessonId).maybeSingle();
+  const { data: lessonMaterials, error: materialError } = await access.admin.from('course_materials')
+    .select('id,storage_path,file_name,mime_type')
+    .eq('course_id', courseId).eq('lesson_id', lessonId).order('file_name');
   if (materialError) return <GuestLessonMessage title="Lesson temporarily unavailable" />;
 
-  let signedUrl = null;
-  if (material) {
-    const { data, error } = await access.admin.storage.from('course-materials')
-      .createSignedUrl(material.storage_path, 300);
-    if (error) return <GuestLessonMessage title="Lesson temporarily unavailable" />;
-    signedUrl = data.signedUrl;
+  let materials;
+  try {
+    materials = await Promise.all((lessonMaterials || []).map(async (material) => {
+      const { data, error } = await access.admin.storage.from('course-materials')
+        .createSignedUrl(material.storage_path, 300);
+      if (error) throw error;
+      return { ...material, signedUrl: data.signedUrl };
+    }));
+  } catch {
+    return <GuestLessonMessage title="Lesson temporarily unavailable" />;
   }
 
   return (
@@ -51,10 +58,10 @@ export default async function GuestLessonPage({ params }) {
           {lessonResult.data.description && <p className="lesson-detail-text">{lessonResult.data.description}</p>}
         </header>
         <div className="lesson-viewer-content">
-          {!material ? <div className="lesson-viewer-placeholder"><h2>Lesson material unavailable</h2><p>No file has been attached to this lesson yet.</p></div>
-            : material.mime_type === 'application/pdf'
-              ? <iframe title={lessonResult.data.title} src={signedUrl} className="lesson-private-pdf" />
-              : <video controls preload="metadata" className="lesson-private-video"><source src={signedUrl} type="video/mp4" /></video>}
+          <CourseMaterialViewer
+            materials={materials}
+            emptyMessage="No private files have been attached to this lesson yet."
+          />
         </div>
         <p className="lesson-protection-note">Private, short-lived links reduce casual copying, but cannot prevent external screen recording.</p>
       </article>

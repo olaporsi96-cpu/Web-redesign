@@ -1,6 +1,7 @@
 node_modules
 .next
 out
+test-results/browser/
 npm-debug.log*
 .DS_Store
 .env*

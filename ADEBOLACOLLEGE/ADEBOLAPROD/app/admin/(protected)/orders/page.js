@@ -194,6 +194,7 @@ export default function OrdersPage() {
                   <StatusBadge status={order.status} />
                   {order.decision_note && <p>{order.decision_note}</p>}
                   {order.admin_email_error && <p className="field-error">Admin email: {order.admin_email_error}</p>}
+                  {order.buyer_email_error && <p className="field-error">Buyer email: {order.buyer_email_error}</p>}
                   {order.status === 'pending' && !order.admin_email_sent_at && (
                     <button type="button" className="text-button" disabled={Boolean(busy)} onClick={() => retryOrderEmail(order)}>
                       {busy === `order-email-${order.id}` ? 'Sending…' : order.admin_email_error ? 'Retry Admin email' : 'Send Admin email'}

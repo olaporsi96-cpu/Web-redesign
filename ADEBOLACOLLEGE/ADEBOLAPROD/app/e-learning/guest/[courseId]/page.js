@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { getGuestCourseAccess } from '../../../../utils/guest-course-access';
+import CourseMaterialViewer from '../../../../components/course-material-viewer';
 
 export const dynamic = 'force-dynamic';
 
@@ -13,13 +14,26 @@ export default async function GuestCoursePage({ params }) {
   }
   if (!access) return <GuestAccessMessage title="Course access expired or revoked" />;
 
-  const [courseResult, lessonsResult] = await Promise.all([
+  const [courseResult, lessonsResult, materialsResult] = await Promise.all([
     access.admin.from('courses').select('id,title,category,description')
-      .eq('id', courseId).maybeSingle(),
+      .eq('id', courseId).eq('status', 'published').maybeSingle(),
     access.admin.from('lessons').select('id,title,lesson_code,duration_minutes')
       .eq('course_id', courseId).eq('status', 'published').order('title'),
+    access.admin.from('course_materials').select('id,storage_path,file_name,mime_type')
+      .eq('course_id', courseId).is('lesson_id', null).order('file_name'),
   ]);
-  if (courseResult.error || lessonsResult.error || !courseResult.data) {
+  if (courseResult.error || lessonsResult.error || materialsResult.error || !courseResult.data) {
+    return <GuestAccessMessage title="Course temporarily unavailable" />;
+  }
+  let materials;
+  try {
+    materials = await Promise.all((materialsResult.data || []).map(async (material) => {
+      const { data, error } = await access.admin.storage.from('course-materials')
+        .createSignedUrl(material.storage_path, 300);
+      if (error) throw error;
+      return { ...material, signedUrl: data.signedUrl };
+    }));
+  } catch {
     return <GuestAccessMessage title="Course temporarily unavailable" />;
   }
 
@@ -33,6 +47,10 @@ export default async function GuestCoursePage({ params }) {
           {courseResult.data.description && <p>{courseResult.data.description}</p>}
           <p>Guest course access expires {new Date(access.entitlement.expires_at).toLocaleString()}.</p>
         </header>
+        <section>
+          <h2>Course-level materials</h2>
+          <CourseMaterialViewer materials={materials} emptyMessage="No course-level files have been added yet." />
+        </section>
         <div className="lesson-viewer-content">
           {lessonsResult.data.length ? (
             <ol className="guest-lesson-list">

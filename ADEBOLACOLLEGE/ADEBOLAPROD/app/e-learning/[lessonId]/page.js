@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import { createClient } from '../../../utils/supabase/server';
+import CourseMaterialViewer from '../../../components/course-material-viewer';
 
 export const dynamic = 'force-dynamic';
 
@@ -43,23 +44,35 @@ export default async function LessonViewerPage({ params }) {
     );
   }
 
-  const [courseResult, materialResult] = await Promise.all([
-    supabase.from('courses').select('title,category').eq('id', lesson.course_id).maybeSingle(),
-    supabase.from('course_materials').select('storage_path,file_name,mime_type').eq('lesson_id', lesson.id).maybeSingle(),
+  const [courseResult, materialsResult] = await Promise.all([
+    supabase.from('courses').select('title,category').eq('id', lesson.course_id)
+      .eq('status', 'published').maybeSingle(),
+    supabase.from('course_materials')
+      .select('id,storage_path,file_name,mime_type')
+      .eq('course_id', lesson.course_id)
+      .eq('lesson_id', lesson.id)
+      .order('file_name'),
   ]);
-  if (courseResult.error || materialResult.error || !courseResult.data) return <LessonServiceError />;
+  if (courseResult.error || materialsResult.error || !courseResult.data) return <LessonServiceError />;
   const { data: course } = courseResult;
-  const { data: material } = materialResult;
-  let signedUrl = null;
-  if (material) {
-    const { data, error } = await supabase.storage.from('course-materials').createSignedUrl(material.storage_path, 300);
-    if (error) return <LessonServiceError />;
-    signedUrl = data.signedUrl;
+  let materials;
+  try {
+    materials = await Promise.all((materialsResult.data || []).map(async (material) => {
+      const { data, error } = await supabase.storage.from('course-materials')
+        .createSignedUrl(material.storage_path, 300);
+      if (error) throw error;
+      return { ...material, signedUrl: data.signedUrl };
+    }));
+  } catch {
+    return <LessonServiceError />;
   }
 
   return (
     <section className="container lesson-viewer-page">
       <Link className="lesson-viewer-back" href="/e-learning#platform">← Back to catalogue</Link>
+      <Link className="lesson-viewer-back" href={`/e-learning/course/${encodeURIComponent(lesson.course_id)}`}>
+        View course-level materials
+      </Link>
       <article className="lesson-viewer-card">
         <header className="lesson-viewer-heading">
           <span>{course?.category || 'Course'}</span>
@@ -72,11 +85,10 @@ export default async function LessonViewerPage({ params }) {
           {lesson.description && <p className="lesson-detail-text">{lesson.description}</p>}
         </header>
         <div className="lesson-viewer-content">
-          {!material ? <div className="lesson-viewer-placeholder"><h2>Lesson material unavailable</h2><p>No file has been attached to this lesson yet.</p></div>
-            : !signedUrl ? <div className="lesson-viewer-placeholder"><h2>Unable to load lesson material</h2><p>Try again or contact the College.</p></div>
-              : material.mime_type === 'application/pdf'
-                ? <iframe title={lesson.title} src={signedUrl} className="lesson-private-pdf" />
-                : <video controls preload="metadata" className="lesson-private-video"><source src={signedUrl} type="video/mp4" /></video>}
+          <CourseMaterialViewer
+            materials={materials}
+            emptyMessage="No private files have been attached to this lesson yet."
+          />
         </div>
         <p className="lesson-protection-note">Private, short-lived links reduce casual copying, but cannot prevent external screen recording.</p>
       </article>

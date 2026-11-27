@@ -67,7 +67,7 @@ button, input, textarea, select { font: inherit; }
   color: var(--navy);
   font-weight: 800;
 }
-.brand-mark img { width: 100%; height: 100%; object-fit: contain; }
+.brand-mark img { width: 100%; height: auto; max-height: 100%; object-fit: contain; }
 .brand-copy {
   line-height: 1.1;
 }
@@ -607,7 +607,8 @@ button, input, textarea, select { font: inherit; }
 
 .brand-mark img {
   width: 100%;
-  height: 100%;
+  height: auto;
+  max-height: 100%;
   object-fit: contain;
 }
 
@@ -858,7 +859,7 @@ button, input, textarea, select { font: inherit; }
   padding: 1.4rem;
   border: 1px solid var(--line);
   border-radius: var(--radius);
-  background: #fff;
+  background: var(--panel);
   box-shadow: var(--shadow);
 }
 
@@ -1004,7 +1005,7 @@ button, input, textarea, select { font: inherit; }
 }
 
 .hero-statement-caption {
-  color: rgba(255,255,255,0.68);
+  color: #fff;
   font-size: 0.85rem;
 }
 
@@ -1093,6 +1094,16 @@ button, input, textarea, select { font: inherit; }
 
 .info-panel-light .eyebrow {
   color: #d7e5ff;
+}
+
+.info-panel-light :is(.text-link, .contact-email),
+.info-panel-light :is(.text-link, .contact-email):visited {
+  color: #d7e5ff;
+}
+
+.info-panel-light :is(.text-link, .contact-email):hover,
+.info-panel-light :is(.text-link, .contact-email):focus-visible {
+  color: #fff;
 }
 
 .curriculum-list {
@@ -1322,6 +1333,7 @@ button, input, textarea, select { font: inherit; }
 .contact-card-emphasis .eyebrow {
   color: #fff;
 }
+.two-column > .contact-card-emphasis p { color: #fff; }
 
 .contact-email {
   display: inline-block;
@@ -1637,6 +1649,23 @@ button, input, textarea, select { font: inherit; }
 :root[data-theme='dark'] .nav-panel { border-color: var(--line); background: #1b2940; }
 :root[data-theme='dark'] .nav-panel a { color: #e7edf7; }
 :root[data-theme='dark'] .nav-panel a:hover { background: #2a3a53; }
+:root[data-theme='dark'] .curriculum-section { background: #111d30; color: var(--text); }
+:root[data-theme='dark'] .curriculum-section :is(.text-link, .contact-email),
+:root[data-theme='dark'] .curriculum-section :is(.text-link, .contact-email):visited { color: #b7caff; }
+:root[data-theme='dark'] .curriculum-section :is(.text-link, .contact-email):hover,
+:root[data-theme='dark'] .curriculum-section :is(.text-link, .contact-email):focus-visible { color: #fff; }
+:root[data-theme='dark'] .info-panel-light {
+  border-color: var(--line);
+  background: var(--panel);
+  color: var(--text);
+}
+:root[data-theme='dark'] .info-panel-light h3 { color: var(--navy-strong); }
+:root[data-theme='dark'] .info-panel-light p { color: var(--muted); }
+:root[data-theme='dark'] .info-panel-light .eyebrow { color: #c4d4ff; }
+:root[data-theme='dark'] .info-panel-light :is(.text-link, .contact-email),
+:root[data-theme='dark'] .info-panel-light :is(.text-link, .contact-email):visited { color: #b7caff; }
+:root[data-theme='dark'] .info-panel-light :is(.text-link, .contact-email):hover,
+:root[data-theme='dark'] .info-panel-light :is(.text-link, .contact-email):focus-visible { color: #fff; }
 :root[data-theme='dark'] :is(.feature-card, .info-card, .news-card, .program-card, .gallery-card, .stage-card, .history-card, .school-photo-card, .info-panel:not(.info-panel-light), .paper-card, .category-card, .step-list li, .list-block li, .school-intro, .form-shell, .faq-item, .contact-card) {
   border-color: var(--line);
   background-color: var(--panel);

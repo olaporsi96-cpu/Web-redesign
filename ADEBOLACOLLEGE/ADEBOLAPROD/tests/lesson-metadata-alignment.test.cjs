@@ -42,8 +42,8 @@ test('metadata-aware save_lesson overload delegates to permission-checked base f
   assert.ok(migration.includes('create or replace function public.save_lesson('));
   assert.ok(migration.includes('lesson_description text,'));
   assert.ok(migration.includes('requested_duration_minutes integer'));
-  assert.ok(migration.includes('public.save_lesson(\n    target_id,'));
+  assert.match(migration, /public\.save_lesson\(\s*target_id,/);
   assert.ok(migration.includes('set description = btrim(lesson_description),'));
   assert.ok(migration.includes('duration_minutes = requested_duration_minutes,'));
-  assert.ok(migration.includes('grant execute on function public.save_lesson(uuid, uuid, text, text, text, text, integer)\n  to authenticated;'));
+  assert.match(migration, /grant execute on function public\.save_lesson\(uuid, uuid, text, text, text, text, integer\)\s+to authenticated;/);
 });

@@ -119,3 +119,8 @@ revoke all on function public.save_course_payment_settings(text, text, text, tex
   from public, anon;
 grant execute on function public.save_course_payment_settings(text, text, text, text)
   to authenticated;
+
+revoke all on function public.save_course_payment_settings(text, text, text)
+  from public, anon;
+grant execute on function public.save_course_payment_settings(text, text, text)
+  to authenticated;

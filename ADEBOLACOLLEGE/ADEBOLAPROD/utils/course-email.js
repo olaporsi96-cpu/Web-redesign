@@ -39,6 +39,37 @@ export async function sendPendingOrderNotification(admin, orderId) {
   });
 }
 
+export async function sendBuyerOrderConfirmation(email, courseTitle, amount, paymentReference) {
+  if (!email) return { ok: false, error: 'Buyer email is unavailable.' };
+  return sendResendEmail({
+    to: email,
+    subject: `Adebola College payment submitted: ${courseTitle}`,
+    text: [
+      `Thank you. Your payment submission for ${courseTitle} has been received for review.`,
+      `Amount: NGN ${Number(amount).toLocaleString('en-NG')}`,
+      `Payment reference: ${paymentReference}`,
+      'Course access is granted only after an Admin approves the payment.',
+    ].join('\n'),
+  });
+}
+
+export async function sendPaymentStatusEmail(email, courseTitle, approved, decisionNote = '') {
+  if (!email) return { ok: false, error: 'Buyer email is unavailable.' };
+  const approvedText = approved
+    ? 'Your payment was approved and course access has been granted.'
+    : 'Your payment was rejected. Please contact Adebola College for assistance.';
+  return sendResendEmail({
+    to: email,
+    subject: `Adebola College course payment ${approved ? 'approved' : 'rejected'}: ${courseTitle}`,
+    text: [
+      approvedText,
+      `Course: ${courseTitle}`,
+      decisionNote ? `Admin note: ${decisionNote}` : '',
+      'Official website: https://adebolacollege.org',
+    ].filter(Boolean).join('\n'),
+  });
+}
+
 export async function sendGuestCourseAccessLink(email, courseTitle, rawToken) {
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL;
   if (!siteUrl) {

@@ -10,7 +10,7 @@
 .catalogue-price-card strong { color: var(--navy); font-size: 1.3rem; }
 .catalogue-price-card small { color: var(--muted); font-size: 0.72rem; font-weight: 400; }
 .catalogue-toolbar { display: grid; gap: 0.85rem; padding: 1rem; border: 1px solid var(--line); border-radius: 13px; background: #fff; }
-.catalogue-search { display: flex; align-items: center; gap: 0.55rem; min-height: 44px; padding: 0 0.8rem; border: 1px solid #dfe5ee; border-radius: 9px; color: #72809a; }
+.catalogue-search { display: flex; align-items: center; gap: 0.55rem; min-height: 44px; padding: 0 0.8rem; border: 1px solid #dfe5ee; border-radius: 9px; color: #59677e; }
 .catalogue-search input { width: 100%; border: 0; outline: 0; color: var(--text); background: transparent; }
 .catalogue-search:focus-within { outline: 3px solid #78a5ff; outline-offset: 2px; }
 .catalogue-category-filters { display: flex; flex-wrap: wrap; gap: 0.5rem; }
@@ -65,7 +65,7 @@
 }
 .catalogue-lesson-list { display: grid; gap: 0.4rem; margin: 0 0 1rem; padding: 0; list-style: none; }
 .catalogue-lesson-list li { display: flex; align-items: baseline; gap: 0.5rem; color: var(--text); font-size: 0.78rem; }
-.catalogue-lesson-list code { color: #53617b; font-size: 0.7rem; }
+.catalogue-lesson-list code { color: var(--muted); font-size: 0.7rem; }
 .catalogue-lesson-list a { color: #2456ba; font-weight: 700; text-decoration: underline; text-decoration-color: transparent; text-underline-offset: 0.16em; }
 .catalogue-lesson-list a:hover,
 .catalogue-lesson-list a:focus-visible { text-decoration-color: currentColor; }

@@ -194,6 +194,9 @@ export default function LearningCatalogue({ courses, lessons, paymentSettings })
                 <div className="catalogue-demo-card-top"><span>{course.category}</span><span>Course</span></div>
                 <h3>{course.title}</h3>
                 {course.description && <p>{course.description}</p>}
+                <Link className="btn btn-outline catalogue-open-button" href={`/e-learning/course/${encodeURIComponent(course.id)}`}>
+                  Course-level materials
+                </Link>
                 <dl>
                   <div><dt>Course price</dt><dd>{formatPrice(course.price)}</dd></div>
                   <div><dt>Published lessons</dt><dd>{courseLessons.length}</dd></div>
@@ -211,7 +214,7 @@ export default function LearningCatalogue({ courses, lessons, paymentSettings })
                     )}
                   </li>)}
                 </ul>}
-                <button className="btn btn-outline catalogue-open-button" type="button" disabled={!bankIsConfigured} onClick={() => { setSelectedCourse(course.id); setMessage(''); setProof(null); }}>
+                <button className="btn btn-outline catalogue-open-button" type="button" onClick={() => { setSelectedCourse(course.id); setMessage(''); setProof(null); }} title={bankIsConfigured ? 'Submit a bank transfer for this course' : 'Bank-transfer details are currently unavailable'}>
                   Buy Now
                 </button>
               </article>
@@ -227,13 +230,15 @@ export default function LearningCatalogue({ courses, lessons, paymentSettings })
         </div>
       )}
 
-      {selectedCourse && bankIsConfigured && (
+      {selectedCourse && (
         <div className="catalogue-order-backdrop" role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget && !busy) setSelectedCourse(''); }}>
           <section className="catalogue-order-dialog" role="dialog" aria-modal="true" aria-labelledby="course-order-title">
             <button className="icon-button" type="button" aria-label="Close" disabled={busy} onClick={() => setSelectedCourse('')}>×</button>
             <h2 id="course-order-title">Submit bank-transfer payment</h2>
-            <p>Transfer {formatPrice(courses.find((item) => item.id === selectedCourse)?.price || 0)} to {paymentSettings.bank_name}, account name {paymentSettings.account_name}, account number {paymentSettings.account_number} ({paymentSettings.account_type}). No order grants course access until an Admin verifies the payment and approves it.</p>
-            <form className="admin-form" onSubmit={submit}>
+            {bankIsConfigured ? (
+              <>
+                <p>Transfer {formatPrice(courses.find((item) => item.id === selectedCourse)?.price || 0)} to {paymentSettings.bank_name}, account name {paymentSettings.account_name}, account number {paymentSettings.account_number} ({paymentSettings.account_type}). No order grants course access until an Admin verifies the payment and approves it.</p>
+                <form className="admin-form" onSubmit={submit}>
               <fieldset className="checkout-mode-options">
                 <legend>Checkout type</legend>
                 <label><input type="radio" name="checkout-mode" value="guest" checked={checkoutMode === 'guest'} onChange={() => setCheckoutMode('guest')} /> Guest checkout</label>
@@ -264,7 +269,11 @@ export default function LearningCatalogue({ courses, lessons, paymentSettings })
               <div className="dialog-actions">
                 <button type="submit" className="admin-button button-primary" disabled={busy || checkoutModeLoading}>{busy ? 'Submitting…' : 'Submit for review'}</button>
               </div>
-            </form>
+                </form>
+              </>
+            ) : (
+              <p className="field-error" role="alert">Bank-transfer details are not currently configured. Please contact Adebola College before submitting a payment. Checkout cannot be completed until all four payment fields are saved.</p>
+            )}
           </section>
         </div>
       )}

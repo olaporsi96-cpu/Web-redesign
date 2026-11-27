@@ -6,6 +6,8 @@ import adminAuthorization from '../../../utils/admin-authorization.cjs';
 import supabaseError from '../../../utils/supabase-error.cjs';
 import accountArchiving from '../../../utils/account-archiving.cjs';
 import guestAccess from '../../../utils/guest-access.cjs';
+import courseMaterialValidation from '../../../utils/course-material.cjs';
+import paymentSettings from '../../../utils/payment-settings.cjs';
 import { sendGuestCourseAccessLink, sendPendingOrderNotification } from '../../../utils/course-email';
 
 const {
@@ -16,6 +18,8 @@ const {
 } = adminAuthorization;
 const { formatSupabaseError } = supabaseError;
 const { profileSelectColumns } = accountArchiving;
+const { MAX_COURSE_MATERIAL_BYTES, matchesCourseMaterialSignature } = courseMaterialValidation;
+const { buildPaymentSettingsRpcArgs } = paymentSettings;
 
 const PERMISSIONS = [
   'manage_courses',
@@ -140,17 +144,6 @@ export async function deleteCourseAction(id) {
   if (!/^[0-9a-f-]{36}$/i.test(id || '')) return { ok: false, error: 'The course is invalid.' };
   try {
     const { supabase } = await getAdminContext('manage_courses');
-    const { data: lessons, error: lessonError } = await supabase.from('lessons')
-      .select('id').eq('course_id', id);
-    if (lessonError) throw lessonError;
-    const lessonIds = (lessons || []).map((lesson) => lesson.id);
-    let materials = [];
-    if (lessonIds.length) {
-      const { data, error } = await supabase.from('course_materials')
-        .select('storage_path').in('lesson_id', lessonIds);
-      if (error) throw error;
-      materials = data || [];
-    }
     const { data: orderCheck, error: orderError } = await supabase.from('course_orders')
       .select('id').eq('course_id', id).limit(1);
     if (orderError) throw orderError;
@@ -165,13 +158,6 @@ export async function deleteCourseAction(id) {
     if (guestCheck?.length) throw new Error('The course cannot be deleted because guest entitlement history exists. Archive it instead.');
     const { error } = await supabase.rpc('delete_course', { target_id: id });
     if (error) throw error;
-    const paths = materials.map((material) => material.storage_path).filter(Boolean);
-    if (paths.length) {
-      const { error: removeError } = await supabase.storage.from('course-materials').remove(paths);
-      if (removeError) {
-        return { ok: true, warning: `Course records were deleted, but private files need Storage cleanup: ${removeError.message}` };
-      }
-    }
     return { ok: true };
   } catch (error) {
     return failure(error, 'Deleting the course');
@@ -226,17 +212,8 @@ export async function deleteLessonAction(id) {
   if (!/^[0-9a-f-]{36}$/i.test(id || '')) return { ok: false, error: 'The lesson is invalid.' };
   try {
     const { supabase } = await getAdminContext('manage_lessons');
-    const { data: material, error: materialError } = await supabase.from('course_materials')
-      .select('storage_path').eq('lesson_id', id).maybeSingle();
-    if (materialError) throw materialError;
     const { error } = await supabase.rpc('delete_lesson', { target_lesson_id: id });
     if (error) throw error;
-    if (material?.storage_path) {
-      const { error: removeError } = await supabase.storage.from('course-materials').remove([material.storage_path]);
-      if (removeError) {
-        return { ok: true, warning: `Lesson deleted, but its private file needs Storage cleanup: ${removeError.message}` };
-      }
-    }
     return { ok: true };
   } catch (error) {
     return failure(error, 'Deleting the lesson');
@@ -280,17 +257,13 @@ export async function loadCatalogueSettings() {
 
 export async function saveCatalogueSettingsAction(settings, payments) {
   try {
+    const paymentArgs = buildPaymentSettingsRpcArgs(payments);
     const { supabase } = await getAdminContext('manage_catalogue_settings');
     const [categoryResult, paymentResult] = await Promise.all([
       supabase.rpc('save_course_catalogue_settings', { settings: settings.map(({ category, codePrefix, codeStart, codeEnd }) => ({
         category, codePrefix, codeStart, codeEnd,
       })) }),
-      supabase.rpc('save_course_payment_settings', {
-        configured_bank: payments.bankName || null,
-        configured_account_name: payments.accountName || null,
-        configured_account_number: payments.accountNumber || null,
-        configured_account_type: payments.accountType || null,
-      }),
+      supabase.rpc('save_course_payment_settings', paymentArgs),
     ]);
     if (categoryResult.error) throw categoryResult.error;
     if (paymentResult.error) throw paymentResult.error;
@@ -306,7 +279,7 @@ export async function loadMaterials() {
     const [courses, lessons, materials] = await Promise.all([
       supabase.from('courses').select('id,title,category'),
       supabase.from('lessons').select('id,course_id,title,status'),
-      supabase.from('course_materials').select('lesson_id,file_name,mime_type,storage_path'),
+      supabase.from('course_materials').select('id,course_id,lesson_id,file_name,mime_type,storage_path'),
     ]);
     if (courses.error) throw courses.error;
     if (lessons.error) throw lessons.error;
@@ -317,17 +290,49 @@ export async function loadMaterials() {
   }
 }
 
-export async function saveMaterialAction(lessonId, path, fileName, mimeType) {
+export async function saveMaterialAction(courseId, lessonId, path, fileName, mimeType, replaceMaterialId = null) {
   try {
     const { supabase } = await getAdminContext('manage_course_materials');
-    const { data: previous, error: previousError } = await supabase.from('course_materials')
-      .select('storage_path').eq('lesson_id', lessonId).maybeSingle();
+    if (!/^[0-9a-f-]{36}$/i.test(courseId || '')
+      || (lessonId !== null && lessonId !== undefined && !/^[0-9a-f-]{36}$/i.test(lessonId))
+      || (replaceMaterialId !== null && !/^[0-9a-f-]{36}$/i.test(replaceMaterialId))
+      || typeof path !== 'string'
+      || typeof fileName !== 'string'
+      || !['application/pdf', 'video/mp4'].includes(mimeType)) {
+      throw new Error('The uploaded course material is invalid.');
+    }
+    const { data: uploaded, error: downloadError } = await supabase.storage
+      .from('course-materials').download(path);
+    if (downloadError) throw new Error(`The uploaded file could not be verified: ${downloadError.message}`);
+    if (!uploaded) throw new Error('The uploaded course material could not be verified.');
+    if (uploaded.size < 1 || uploaded.size > MAX_COURSE_MATERIAL_BYTES) {
+      throw new Error('The uploaded course material must be no larger than 50 MB.');
+    }
+    const signatureBytes = Buffer.from(await uploaded.arrayBuffer());
+    if (!matchesCourseMaterialSignature(mimeType, signatureBytes)) {
+      throw new Error('The uploaded file content does not match an allowed PDF or MP4 file.');
+    }
+    const extension = fileName.toLowerCase().split('.').pop();
+    if ((mimeType === 'application/pdf' && extension !== 'pdf')
+      || (mimeType === 'video/mp4' && extension !== 'mp4')) {
+      throw new Error('The uploaded file name and content type do not match.');
+    }
+    const { data: previous, error: previousError } = replaceMaterialId
+      ? await supabase.from('course_materials').select('storage_path,course_id,lesson_id').eq('id', replaceMaterialId).maybeSingle()
+      : { data: null, error: null };
     if (previousError) throw previousError;
-    const { error } = await supabase.rpc('save_course_material', {
-      target_lesson_id: lessonId,
+    if (replaceMaterialId && (!previous
+      || previous.course_id !== courseId
+      || previous.lesson_id !== (lessonId || null))) {
+      throw new Error('The selected material does not belong to this course area.');
+    }
+    const { error } = await supabase.rpc('save_course_material_v2', {
+      target_course_id: courseId,
+      target_lesson_id: lessonId || null,
       material_path: path,
       material_name: fileName,
       material_mime: mimeType,
+      replace_material_id: replaceMaterialId,
     });
     if (error) throw error;
     let warning = '';
@@ -341,14 +346,25 @@ export async function saveMaterialAction(lessonId, path, fileName, mimeType) {
   }
 }
 
-export async function removeMaterialAction(lessonId) {
+export async function removeMaterialAction(materialId) {
   try {
+    if (!/^[0-9a-f-]{36}$/i.test(materialId || '')) {
+      throw new Error('Select a specific course material to remove.');
+    }
     const { supabase } = await getAdminContext('manage_course_materials');
-    const { data: path, error } = await supabase.rpc('remove_course_material', { target_lesson_id: lessonId });
-    if (error) throw error;
-    if (path) {
-      const { error: deleteError } = await supabase.storage.from('course-materials').remove([path]);
-      if (deleteError) throw deleteError;
+    const { data: material, error: materialError } = await supabase.from('course_materials')
+      .select('storage_path').eq('id', materialId).maybeSingle();
+    if (materialError) throw materialError;
+    if (!material) throw new Error('The selected course material no longer exists.');
+    const { error: deleteError } = await supabase.storage.from('course-materials').remove([material.storage_path]);
+    if (deleteError) {
+      throw new Error(`The Storage file could not be deleted; its material record was preserved: ${deleteError.message}`);
+    }
+    const { error } = await supabase.rpc('remove_course_material_record', {
+      target_material_id: materialId,
+    });
+    if (error) {
+      throw new Error(`The Storage file was removed, but its material record could not be deleted. Retry the delete action: ${error.message}`);
     }
     return { ok: true };
   } catch (error) {
@@ -361,7 +377,7 @@ export async function loadPaymentOrders() {
     const { supabase } = await getAdminContext('view_orders_payments');
     const [orders, courses, access, revocationHistory] = await Promise.all([
       supabase.from('course_orders')
-        .select('id,profile_id,buyer_name,buyer_email,course_id,amount,payment_reference,proof_path,status,decision_note,created_at,admin_email_sent_at,admin_email_error')
+        .select('id,profile_id,buyer_name,buyer_email,course_id,amount,payment_reference,proof_path,status,decision_note,created_at,admin_email_sent_at,admin_email_error,buyer_email_sent_at,buyer_email_error')
         .order('created_at', { ascending: false }),
       supabase.from('courses').select('id,title'),
       supabase.from('course_access')

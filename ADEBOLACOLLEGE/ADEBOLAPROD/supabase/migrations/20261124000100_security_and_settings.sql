@@ -366,17 +366,27 @@ language plpgsql
 security definer
 set search_path = pg_catalog, public, pg_temp
 as $$
+declare target_row tid;
 begin
   if auth.uid() is null or not public.has_admin_permission('manage_catalogue_settings') then
     raise exception 'Catalogue settings permission required';
   end if;
-
+  perform pg_advisory_xact_lock(760501, 1);
+  select ctid into target_row
+  from public.course_payment_settings
+  order by updated_at desc nulls last
+  limit 1
+  for update;
   if configured_bank is null and configured_account_name is null
      and configured_account_number is null then
-    delete from public.course_payment_settings where id = true;
+    if target_row is not null then
+      update public.course_payment_settings
+      set bank_name = null, account_name = null, account_number = null,
+          account_type = null, updated_at = clock_timestamp(), updated_by = auth.uid()
+      where ctid = target_row;
+    end if;
     return;
   end if;
-
   if length(btrim(coalesce(configured_bank, ''))) = 0
      or length(btrim(coalesce(configured_account_name, ''))) = 0
      or length(btrim(coalesce(configured_account_number, ''))) = 0
@@ -385,25 +395,23 @@ begin
      or length(configured_account_number) > 40 then
     raise exception 'Enter the bank name, account name, and account number';
   end if;
-
-  insert into public.course_payment_settings (
-    id, bank_name, account_name, account_number, account_type, updated_by
-  )
-  values (
-    true, btrim(configured_bank), btrim(configured_account_name),
-    btrim(configured_account_number),
-    (select s.account_type from public.course_payment_settings s where s.id = true),
-    auth.uid()
-  )
-  on conflict (id) do update
-    set bank_name = excluded.bank_name,
-        account_name = excluded.account_name,
-        account_number = excluded.account_number,
-        account_type = (select s.account_type
-                        from public.course_payment_settings s
-                        where s.id = true),
+  if target_row is null then
+    insert into public.course_payment_settings (
+      bank_name, account_name, account_number, updated_by
+    )
+    values (
+      btrim(configured_bank), btrim(configured_account_name),
+      btrim(configured_account_number), auth.uid()
+    );
+  else
+    update public.course_payment_settings
+    set bank_name = btrim(configured_bank),
+        account_name = btrim(configured_account_name),
+        account_number = btrim(configured_account_number),
         updated_at = clock_timestamp(),
-        updated_by = auth.uid();
+        updated_by = auth.uid()
+    where ctid = target_row;
+  end if;
 end;
 $$;
 revoke all on function public.save_course_payment_settings(text, text, text) from public, anon;
