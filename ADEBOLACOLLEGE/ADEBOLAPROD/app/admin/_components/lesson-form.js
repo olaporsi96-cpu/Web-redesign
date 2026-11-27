@@ -5,9 +5,13 @@ import { FormDialog } from './admin-ui';
 
 export default function LessonForm({ lesson, courses, onSave, onClose, canPublish = true }) {
   const [form, setForm] = useState(lesson ? {
-    ...lesson, courseId: lesson.course_id, code: lesson.lesson_code || '',
+    ...lesson,
+    courseId: lesson.course_id,
+    code: lesson.lesson_code || '',
+    description: lesson.description || '',
+    durationMinutes: lesson.duration_minutes ?? '',
   } : {
-    title: '', courseId: courses[0]?.id || '', code: '', status: 'draft',
+    title: '', courseId: courses[0]?.id || '', code: '', description: '', durationMinutes: '', status: 'draft',
   });
   const [error, setError] = useState('');
   const [saving, setSaving] = useState(false);
@@ -21,6 +25,8 @@ export default function LessonForm({ lesson, courses, onSave, onClose, canPublis
         ...form,
         title: form.title.trim(),
         code: form.code.trim(),
+        description: form.description.trim(),
+        durationMinutes: form.durationMinutes === '' ? null : Number(form.durationMinutes),
         status: canPublish ? form.status : lesson?.status || 'draft',
       });
       if (!result?.ok) {
@@ -48,11 +54,19 @@ export default function LessonForm({ lesson, courses, onSave, onClose, canPublis
         </label>
         <label>
           Lesson title
-          <input required maxLength={100} value={form.title} onChange={(event) => setForm({ ...form, title: event.target.value })} />
+          <input required maxLength={140} value={form.title} onChange={(event) => setForm({ ...form, title: event.target.value })} />
         </label>
         <label>
           Lesson code
           <input maxLength={40} value={form.code || ''} onChange={(event) => setForm({ ...form, code: event.target.value })} placeholder={lesson ? 'Optional' : 'Auto-generated when blank'} />
+        </label>
+        <label>
+          Lesson description, skills, prerequisites, and recommended textbooks
+          <textarea rows={7} maxLength={5000} value={form.description} onChange={(event) => setForm({ ...form, description: event.target.value })} />
+        </label>
+        <label>
+          Duration (minutes)
+          <input type="number" min="1" max="600" step="1" value={form.durationMinutes} onChange={(event) => setForm({ ...form, durationMinutes: event.target.value })} />
         </label>
         {!lesson && <p className="field-hint">Leave blank to assign the next available code from this course category&apos;s configured range.</p>}
         {canPublish ? (

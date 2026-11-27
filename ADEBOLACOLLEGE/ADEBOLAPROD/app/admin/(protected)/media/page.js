@@ -2,8 +2,8 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { createClient } from '../../../../utils/supabase/client';
-import { PageHeading } from '../../_components/admin-ui';
-import { loadEducationalVideo, saveEducationalVideo } from './actions';
+import { ConfirmDialog, PageHeading } from '../../_components/admin-ui';
+import { deleteEducationalVideo, loadEducationalVideo, saveEducationalVideo } from './actions';
 
 const MAX_VIDEO_BYTES = 250 * 1024 * 1024;
 const bucket = 'elearning-public-media';
@@ -17,6 +17,7 @@ export default function EducationalVideoAdminPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [message, setMessage] = useState('');
+  const [confirmDelete, setConfirmDelete] = useState(false);
   const objectUrl = useRef('');
 
   async function refresh() {
@@ -70,6 +71,7 @@ export default function EducationalVideoAdminPage() {
         if (uploadError) throw uploadError;
         uploadedPath = path;
       }
+
       if (!path || !fileName) throw new Error('Select an MP4 video before saving.');
       const response = await saveEducationalVideo({ path, fileName, published });
       if (!response.ok) throw new Error(response.error);
@@ -96,6 +98,31 @@ export default function EducationalVideoAdminPage() {
     }
   }
 
+  async function removeVideo() {
+    setBusy(true);
+    setError('');
+    setMessage('');
+    try {
+      const response = await deleteEducationalVideo();
+      if (!response.ok) {
+        setError(response.error);
+        await refresh();
+        return;
+      }
+      setFile(null);
+      setPreviewUrl('');
+      if (objectUrl.current) URL.revokeObjectURL(objectUrl.current);
+      objectUrl.current = '';
+      setMessage(response.warning || 'Educational video deleted and unpublished.');
+      await refresh();
+    } catch (deleteError) {
+      setError(deleteError instanceof Error ? deleteError.message : 'Unable to delete the educational video.');
+    } finally {
+      setBusy(false);
+      setConfirmDelete(false);
+    }
+  }
+
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const currentUrl = current?.video_path && supabaseUrl
     ? `${supabaseUrl}/storage/v1/object/public/${bucket}/${current.video_path.split('/').map(encodeURIComponent).join('/')}`
@@ -119,9 +146,17 @@ export default function EducationalVideoAdminPage() {
             {busy && <progress className="upload-progress" aria-label="Video upload in progress" />}
             <label className="video-publish-option"><input type="checkbox" checked={published} onChange={(event) => setPublished(event.target.checked)} disabled={busy} /> Publish on the public E-Learning page</label>
             <div className="dialog-actions"><button className="admin-button button-primary" type="submit" disabled={busy || (!file && !current?.video_path)}>{busy ? 'Uploading and saving…' : current ? 'Save video settings' : 'Upload and save video'}</button></div>
+            {current?.video_path && <button className="admin-button button-danger" type="button" disabled={busy} onClick={() => setConfirmDelete(true)}>Delete / clear featured video</button>}
           </form>
         </section>
       )}
+      {confirmDelete && <ConfirmDialog
+        title="Delete the featured E-Learning video?"
+        description="The video will be unpublished, its settings cleared, and the stored video object removed."
+        confirmLabel={busy ? 'Deleting…' : 'Delete video'}
+        onCancel={() => { if (!busy) setConfirmDelete(false); }}
+        onConfirm={removeVideo}
+      />}
     </>
   );
 }

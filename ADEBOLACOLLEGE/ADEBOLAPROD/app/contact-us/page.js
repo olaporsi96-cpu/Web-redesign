@@ -1,8 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-
-const CONTACT_EMAIL = 'contactus@adebolacollege.org';
+import { useWebsiteSettings } from '../../components/website-settings-context';
 const MAX_MESSAGE_WORDS = 400;
 
 function createChallenge() {
@@ -17,6 +16,7 @@ function countWords(value) {
 }
 
 export default function ContactPage() {
+  const settings = useWebsiteSettings();
   const [form, setForm] = useState({ name: '', email: '', message: '', captcha: '' });
   const [challenge, setChallenge] = useState(null);
   const [errors, setErrors] = useState({});
@@ -70,7 +70,7 @@ export default function ContactPage() {
 
     const subject = `Website enquiry from ${trimmedName}`;
     const body = `Name: ${trimmedName}\nEmail: ${trimmedEmail}\n\n${trimmedMessage}`;
-    setMailLink(`mailto:${CONTACT_EMAIL}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`);
+    setMailLink(`mailto:${settings.contactEmail}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`);
     setNotice({
       type: 'success',
       text: 'Validation passed. Your message has not been sent. Use the link below to open your email application and send it.',
@@ -91,7 +91,7 @@ export default function ContactPage() {
           <div className="hero-statement">
             <span className="hero-statement-mark" aria-hidden="true">Il</span>
             <p>51 Gaa Akanbi Road<br />Ilorin, Kwara State</p>
-            <span className="hero-statement-caption">Address listed in the supplied school information</span>
+            <span className="hero-statement-caption">Adebola College · Ilorin, Kwara State</span>
           </div>
         </div>
       </section>
@@ -120,20 +120,16 @@ export default function ContactPage() {
             <div className="contact-card contact-card-emphasis">
               <span className="eyebrow eyebrow-light">Email the College</span>
               <h2>Contact enquiries</h2>
-              <a className="contact-email" href={`mailto:${CONTACT_EMAIL}`}>{CONTACT_EMAIL}</a>
-              <p>This email address was confirmed in the client’s project instructions.</p>
+              <a className="contact-email" href={`mailto:${settings.contactEmail}`}>{settings.contactEmail}</a>
             </div>
 
             <div className="contact-card">
               <span className="eyebrow">Telephone</span>
               <h2>Call the College</h2>
-              <p><a className="contact-email" href="tel:+2348035364720">+2348035364720</a></p>
-              <p><a className="contact-email" href="tel:+2348033628755">+2348033628755</a></p>
+              {settings.contactPhonePrimary && <p><a className="contact-email" href={`tel:${settings.contactPhonePrimary.replace(/[^\d+]/g, '')}`}>{settings.contactPhonePrimary}</a></p>}
+              {settings.contactPhoneSecondary && <p><a className="contact-email" href={`tel:${settings.contactPhoneSecondary.replace(/[^\d+]/g, '')}`}>{settings.contactPhoneSecondary}</a></p>}
             </div>
 
-            <p className="content-note">
-              No office hours or additional telephone details are listed.
-            </p>
           </div>
 
           <div className="form-shell contact-form-shell">

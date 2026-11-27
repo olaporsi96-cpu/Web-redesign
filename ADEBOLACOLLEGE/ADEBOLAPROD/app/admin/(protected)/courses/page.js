@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { ConfirmDialog, EmptyState, PageHeading, RetryState, StatusBadge, Toast } from '../../_components/admin-ui';
 import CourseForm from '../../_components/course-form';
-import { archiveCourseAction, loadCourseAdminData, saveCourseAction } from '../catalogue-actions';
+import { archiveCourseAction, deleteCourseAction, loadCourseAdminData, saveCourseAction } from '../catalogue-actions';
 
 function displayDate(value) {
   return value ? new Date(value).toLocaleDateString() : '—';
@@ -64,11 +64,13 @@ export default function CoursesPage() {
   }
 
   async function archive() {
-    const result = await archiveCourseAction(confirming.id);
+    const result = confirming.action === 'delete'
+      ? await deleteCourseAction(confirming.id)
+      : await archiveCourseAction(confirming.id);
     setConfirming(null);
     if (result.ok) {
       await refresh();
-      setToast('Course archived.');
+      setToast(result.warning || (confirming.action === 'delete' ? 'Course deleted.' : 'Course archived.'));
     } else setError(result.error);
   }
 
@@ -111,7 +113,8 @@ export default function CoursesPage() {
                     if (result.ok) { await refresh(); setToast(course.status === 'published' ? 'Course unpublished.' : 'Course published.'); }
                     else setError(result.error);
                   }}>{course.status === 'published' ? 'Unpublish' : 'Publish'}</button>}
-                  {course.status !== 'archived' && <button type="button" className="text-button text-danger" onClick={() => setConfirming(course)}>Archive</button>}
+                  {course.status !== 'archived' && <button type="button" className="text-button text-danger" onClick={() => setConfirming({ ...course, action: 'archive' })}>Archive</button>}
+                  {course.status !== 'published' && <button type="button" className="text-button text-danger" onClick={() => setConfirming({ ...course, action: 'delete' })}>Delete course</button>}
                 </div></td>
               </tr>
             ))}</tbody>
@@ -126,7 +129,15 @@ export default function CoursesPage() {
         )}
       </section>
       {editing && <CourseForm course={editing.isNew ? null : editing} canPublish={canPublish} onSave={save} onClose={() => setEditing(null)} />}
-      {confirming && <ConfirmDialog title="Archive this course?" description={`“${confirming.title}” will no longer be offered in the catalogue.`} confirmLabel="Archive course" onCancel={() => setConfirming(null)} onConfirm={archive} />}
+      {confirming && <ConfirmDialog
+        title={confirming.action === 'delete' ? 'Delete this course?' : 'Archive this course?'}
+        description={confirming.action === 'delete'
+          ? `“${confirming.title}” will be permanently removed only if it has no payment or entitlement history.`
+          : `“${confirming.title}” will no longer be offered in the catalogue.`}
+        confirmLabel={confirming.action === 'delete' ? 'Delete course' : 'Archive course'}
+        onCancel={() => setConfirming(null)}
+        onConfirm={archive}
+      />}
       <Toast message={toast} onDismiss={() => setToast('')} />
     </>
   );

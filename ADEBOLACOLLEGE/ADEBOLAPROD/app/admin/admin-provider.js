@@ -26,6 +26,7 @@ export function AdminProvider({ children, initialProfile }) {
     displayName: initialProfile.display_name,
     email: initialProfile.email,
     role: initialProfile.role,
+    pendingOrderCount: Number(initialProfile.pending_order_count) || 0,
     adminEnabled: initialProfile.admin_enabled === true,
     permissions: initialProfile.role === 'main_admin'
       ? ADMIN_PERMISSION_DEFINITIONS.map(({ key }) => key)

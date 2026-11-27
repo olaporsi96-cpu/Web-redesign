@@ -1,7 +1,10 @@
 import Image from 'next/image';
 import Link from 'next/link';
+import ContactEmailLink from './contact-email-link';
+import { useWebsiteSettings } from './website-settings-context';
 
 export default function SiteFooter() {
+  const settings = useWebsiteSettings();
   return (
     <footer className="site-footer">
       <div className="container">
@@ -47,7 +50,10 @@ export default function SiteFooter() {
               <Link href="/e-learning">E-Learning</Link>
               <Link href="/student/login">Student results portal</Link>
               <Link href="/contact-us">51 Gaa Akanbi Road, Ilorin</Link>
-              <a href="mailto:contactus@adebolacollege.org">contactus@adebolacollege.org</a>
+              <ContactEmailLink />
+              <ContactEmailLink type="elearning" />
+              {settings?.contactPhonePrimary && <a href={`tel:${settings.contactPhonePrimary.replace(/[^\d+]/g, '')}`}>{settings.contactPhonePrimary}</a>}
+              {settings?.contactPhoneSecondary && <a href={`tel:${settings.contactPhoneSecondary.replace(/[^\d+]/g, '')}`}>{settings.contactPhoneSecondary}</a>}
             </div>
           </div>
         </div>

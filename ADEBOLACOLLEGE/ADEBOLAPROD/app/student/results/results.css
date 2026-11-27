@@ -35,6 +35,7 @@
 .student-login-current > strong { color: #263650; font-size: 0.9rem; }
 .student-login-current .admin-auth-error { width: 100%; margin: 0; color: #a32626; font-size: 0.78rem; text-align: left; }
 .student-login-return { color: #2456ba; font-size: 0.82rem; font-weight: 700; text-decoration: underline; text-underline-offset: 0.18em; }
+:root[data-theme='dark'] .student-login-return { color: #a7c1ff; }
 .student-login-warning { padding-top: 0.75rem; border-top: 1px solid #e4e9f1; font-size: 0.75rem !important; }
 .student-access-page { display: grid; justify-items: center; gap: 0.8rem; }
 

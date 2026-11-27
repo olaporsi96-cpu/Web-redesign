@@ -1,6 +1,6 @@
 import Image from 'next/image';
 import Link from 'next/link';
-import HomeSpotlight from '../components/home-spotlight';
+import HomeHero from '../components/home-hero';
 
 const schoolFacts = [
   { value: '2005', label: 'Founded in September' },
@@ -11,13 +11,13 @@ const schoolFacts = [
 const destinations = [
   {
     title: 'Admissions',
-    text: 'Read about the entrance examination process and download the supplied sample papers.',
+    text: 'Read about the entrance examination process and download sample papers.',
     href: '/admissions',
     action: 'Explore admissions',
   },
   {
     title: 'Academics',
-    text: 'Explore the Junior and Senior Secondary information and selected curriculum topics.',
+    text: 'Explore academic pathways and information about learning across secondary years.',
     href: '/academics',
     action: 'View academics',
   },
@@ -32,36 +32,7 @@ const destinations = [
 export default function HomePage() {
   return (
     <>
-      <section className="page-hero home-hero">
-        <div className="container page-hero-inner">
-          <div className="home-hero-copy">
-            <span className="eyebrow eyebrow-light">Adebola College · Ilorin, Kwara State</span>
-            <HomeSpotlight />
-            <div className="hero-actions">
-              <Link href="/admissions" className="btn btn-primary">Explore admissions</Link>
-              <Link href="/about-us" className="btn btn-secondary">About the College</Link>
-            </div>
-          </div>
-
-          <div className="school-visual">
-            <Image
-              src="/images/NewPics/Pix1-Building.jpeg"
-              alt="Students playing on the school field in front of a College building."
-              width={960}
-              height={640}
-              priority
-              className="school-premises-photo"
-            />
-            <Image
-              src="/images/NewPics/Pix25-SchoolLogo.jpg"
-              alt="Adebola College crest"
-              width={338}
-              height={345}
-              className="school-visual-logo"
-            />
-          </div>
-        </div>
-      </section>
+      <HomeHero />
 
       <section className="section school-intro">
         <div className="container intro-layout">
@@ -71,8 +42,7 @@ export default function HomePage() {
           </div>
           <div>
             <p className="lead-copy">
-              The College’s supplied overview describes a learning community that brings academic rigour together
-              with character development, leadership, and service.
+              Adebola College brings academic rigour together with character development, leadership, and service.
             </p>
             <Link href="/about-us" className="text-link">Discover the College <span aria-hidden="true">→</span></Link>
           </div>
@@ -84,9 +54,9 @@ export default function HomePage() {
           <div className="section-header section-heading-row">
             <div>
               <span className="eyebrow">The College</span>
-              <h2>Milestones from the supplied school overview.</h2>
+              <h2>College milestones.</h2>
             </div>
-            <p>Dates and details shown here are taken from the client-provided school content.</p>
+            <p>Learning and development at Adebola College.</p>
           </div>
           <div className="fact-grid">
             {schoolFacts.map((fact) => (
@@ -135,8 +105,7 @@ export default function HomePage() {
             <span className="eyebrow">Learn beyond the classroom</span>
             <h2 className="display-heading">Discover the E-Learning categories.</h2>
             <p className="lead-copy">
-              JSS, SSS, and Standardized Tests are the three categories named in the College’s supplied E-Learning
-              materials.
+              Explore courses in JSS, SSS, and Standardized Tests.
             </p>
             <Link href="/e-learning" className="btn btn-outline">Visit E-Learning</Link>
           </div>

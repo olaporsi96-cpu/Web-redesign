@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import ContactEmailLink from '../../components/contact-email-link';
 import LearningCatalogue from '../../components/learning-catalogue';
 import EducationalVideo from '../../components/educational-video';
 import { createClient } from '../../utils/supabase/server';
@@ -13,8 +14,9 @@ export default async function ELearningPage() {
       .eq('status', 'published')
       .order('title'),
     supabase.from('course_payment_settings')
-      .select('bank_name,account_name,account_number')
-      .eq('id', true)
+      .select('bank_name,account_name,account_number,account_type')
+      .order('updated_at', { ascending: false })
+      .limit(1)
       .maybeSingle(),
     supabase.from('elearning_feature_settings')
       .select('video_path,published')
@@ -27,7 +29,7 @@ export default async function ELearningPage() {
   const courseIds = (courses || []).map((course) => course.id);
   if (!coursesError && courseIds.length) {
     const response = await supabase.from('lessons')
-      .select('id,course_id,title,lesson_code')
+      .select('id,course_id,title,lesson_code,description,duration_minutes')
       .in('course_id', courseIds)
       .eq('status', 'published')
       .order('title');
@@ -49,18 +51,18 @@ export default async function ELearningPage() {
             <span className="eyebrow eyebrow-light">Adebola College · E-Learning</span>
             <h1>Learning resources for different pathways.</h1>
             <p>
-              The College describes its E-Learning programme as a flexible digital learning environment designed to
-              complement classroom learning and support students’ independent study.
+              The E-Learning programme provides a flexible digital learning environment that complements classroom
+              learning and supports independent study.
             </p>
             <div className="hero-actions">
-              <a href="mailto:e-learning@adebolacollege.org" className="btn btn-primary">E-Learning enquiries</a>
+              <ContactEmailLink type="elearning" className="btn btn-primary">E-Learning enquiries</ContactEmailLink>
               <Link href="/academics" className="btn btn-secondary">Academic information</Link>
             </div>
           </div>
           <div className="hero-statement">
             <span className="hero-statement-mark" aria-hidden="true">e</span>
             <p>Study at your pace.<br />Learn from anywhere.</p>
-            <span className="hero-statement-caption">E-Learning themes supplied by the College</span>
+            <span className="hero-statement-caption">Learn at your pace. Learn from anywhere.</span>
           </div>
         </div>
       </section>
@@ -90,9 +92,8 @@ export default async function ELearningPage() {
           </div>
           <div className="info-panel info-panel-light">
             <span className="eyebrow">Standardized Tests</span>
-            <h3>Preparation areas listed in the supplied content.</h3>
+            <h3>Preparation areas</h3>
             <p>GMAT, NECO, GRE (General), SAT, IGSCE (Cambridge), WAEC, and JAMB.</p>
-            <p className="catalogue-note">“IGSCE” is retained as written in the source; confirm the intended spelling.</p>
           </div>
         </div>
       </section>
@@ -104,9 +105,7 @@ export default async function ELearningPage() {
             <h2>Questions about lessons or resources?</h2>
             <p>For course enquiries or assistance with a bank-transfer submission, contact the College.</p>
           </div>
-          <a className="btn btn-outline" href="mailto:e-learning@adebolacollege.org">
-            e-learning@adebolacollege.org
-          </a>
+          <ContactEmailLink type="elearning" className="btn btn-outline" />
         </div>
       </section>
     </>

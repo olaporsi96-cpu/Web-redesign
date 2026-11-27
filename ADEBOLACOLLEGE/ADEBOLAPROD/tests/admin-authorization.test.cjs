@@ -17,6 +17,16 @@ test('Main Admin and Sub-Admin roles are distinguished', () => {
   assert.equal(isMainAdminProfile({ role: 'sub_admin' }), false);
   assert.equal(isAdminEnabledProfile({ role: 'main_admin', admin_enabled: true }), true);
   assert.equal(isAdminEnabledProfile({ role: 'sub_admin', admin_enabled: false }), false);
+  // AdminProvider maps the database field to this camelCase client-side shape.
+  assert.equal(isAdminEnabledProfile({ role: 'main_admin', adminEnabled: true }), true);
+  assert.equal(
+    hasAdminRouteAccess({ role: 'main_admin', adminEnabled: true }, '/admin'),
+    true
+  );
+  assert.equal(
+    hasAdminRouteAccess({ role: 'main_admin', adminEnabled: false }, '/admin'),
+    false
+  );
 });
 
 test('Sub-Admins can access routes only through assigned permissions', () => {

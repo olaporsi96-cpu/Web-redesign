@@ -1,22 +1,27 @@
 import Image from 'next/image';
 import Link from 'next/link';
+import ContactEmailLink from '../../components/contact-email-link';
 
 const facilities = [
   {
     title: 'Classrooms',
-    text: 'The supplied school overview describes classrooms for JSS1–JSS3 and SS1–SS3.',
+    text: 'Adebola College provides classrooms for Junior and Senior Secondary students.',
   },
   {
     title: 'Library',
-    text: 'The school content describes a library for independent study, group study, and research.',
+    text: 'The College library supports independent study, group study, and research.',
   },
   {
-    title: 'Science laboratories and playground',
-    text: 'Science laboratories and a playground are listed in the supplied facilities description.',
+    title: 'Science laboratories',
+    text: 'Students use the College science laboratories for practical learning.',
   },
   {
-    title: 'Online learning',
-    text: 'The school overview describes an E-Learning programme as part of the College’s learning environment.',
+    title: 'Playground',
+    text: 'A playground is part of the College facilities.',
+  },
+  {
+    title: 'Online Learning',
+    text: 'The College E-Learning programme supports learning beyond the classroom.',
   },
 ];
 
@@ -40,7 +45,7 @@ export default function AboutPage() {
           <div className="hero-statement">
             <span className="hero-statement-mark" aria-hidden="true">“</span>
             <p>A collaborative community emphasising academic rigour and character development.</p>
-            <span className="hero-statement-caption">Adebola College · supplied school content</span>
+            <span className="hero-statement-caption">Adebola College</span>
           </div>
         </div>
       </section>
@@ -51,20 +56,19 @@ export default function AboutPage() {
             <span className="eyebrow">Who we are</span>
             <h2 className="display-heading">A coeducational school serving learners in Ilorin.</h2>
             <p>
-              According to the supplied school overview, Adebola College was founded in September 2005 and received
-              a licence from the Kwara State Government to operate in July 2010. The College began admitting students
+              Adebola College was founded in September 2005 and received a licence from the Kwara State Government
+              to operate in July 2010. The College began admitting students
               in the 2006/2007 academic year and introduced a long-distance learning programme in 2021/2022.
             </p>
             <p>
-              The overview describes the school as a community that encourages intellectual excellence, moral
-              character, leadership, and service.
+              The College encourages intellectual excellence, moral character, leadership, and service.
             </p>
-            <p>Location listed in the supplied school information: 51 Gaa-Akanbi Road, Ilorin, Kwara State.</p>
+            <p>Location: 51 Gaa-Akanbi Road, Ilorin, Kwara State.</p>
           </div>
           <aside className="history-card" aria-label="School timeline">
             <div className="timeline-item">
               <span>September 2005</span>
-              <p>Founded, according to the supplied school overview.</p>
+              <p>Founded.</p>
             </div>
             <div className="timeline-item">
               <span>2006/2007</span>
@@ -72,7 +76,7 @@ export default function AboutPage() {
             </div>
             <div className="timeline-item">
               <span>July 2010</span>
-              <p>Kwara State operating licence date listed in the overview.</p>
+              <p>Licence to operate granted by Kwara State Government.</p>
             </div>
             <div className="timeline-item">
               <span>2021/2022</span>
@@ -90,12 +94,8 @@ export default function AboutPage() {
             “Build a collaborative community that emphasizes academic rigor and character development to foster
             innovative problem solvers and life-long learners.”
           </p>
-          <div className="content-note">
-            The supplied overview labels this statement as the College’s mission, while a JSS entrance paper labels
-            similar wording as its vision. It is presented here without choosing either label pending confirmation.
-          </div>
           <div className="goals-summary">
-            <h3>Goals and values described in the overview</h3>
+            <h3>College values</h3>
             <p>Intellectual excellence, moral character, leadership, and service.</p>
           </div>
         </div>
@@ -106,9 +106,9 @@ export default function AboutPage() {
           <div className="section-header section-heading-row">
             <div>
               <span className="eyebrow">Facilities</span>
-              <h2>Spaces described in the school overview.</h2>
+              <h2>Spaces for learning and school life.</h2>
             </div>
-            <p>The supplied photographs below show school premises, student activity, and a science laboratory.</p>
+            <p>Learning and activity spaces at Adebola College.</p>
           </div>
           <div className="card-grid">
             {facilities.map((facility) => (
@@ -147,17 +147,14 @@ export default function AboutPage() {
             <span className="eyebrow">Employment</span>
             <h2 className="display-heading">Interested in working with the College?</h2>
             <p>
-              The supplied content invites prospective applicants to contact the school with an up-to-date resume.
-              The email address in that section ends in `.edu` and differs from the client-confirmed `.org` address;
-              use the confirmed contact address to request current instructions.
+              For employment enquiries, contact the College to ask about current opportunities and application
+              instructions.
             </p>
           </div>
           <div className="contact-card contact-card-emphasis">
             <h3>Contact the College</h3>
             <p>Ask about employment enquiries and current opportunities.</p>
-            <a className="text-link" href="mailto:contactus@adebolacollege.org">
-              contactus@adebolacollege.org <span aria-hidden="true">→</span>
-            </a>
+            <ContactEmailLink className="text-link">Contact the College <span aria-hidden="true">→</span></ContactEmailLink>
           </div>
         </div>
       </section>

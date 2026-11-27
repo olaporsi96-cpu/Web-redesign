@@ -11,7 +11,7 @@ const emptyCategories = courseCategories.map((category) => ({
 
 export default function SettingsPage() {
   const [settings, setSettings] = useState(emptyCategories);
-  const [payments, setPayments] = useState({ bankName: '', accountName: '', accountNumber: '' });
+  const [payments, setPayments] = useState({ bankName: '', accountName: '', accountNumber: '', accountType: '' });
   const [error, setError] = useState('');
   const [loadError, setLoadError] = useState('');
   const [loading, setLoading] = useState(true);
@@ -37,6 +37,7 @@ export default function SettingsPage() {
         bankName: result.data.payments?.bank_name || '',
         accountName: result.data.payments?.account_name || '',
         accountNumber: result.data.payments?.account_number || '',
+        accountType: result.data.payments?.account_type || '',
       });
     } catch (loadFailure) {
       setLoadError(loadFailure instanceof Error ? loadFailure.message : 'Unable to load catalogue settings.');
@@ -64,7 +65,7 @@ export default function SettingsPage() {
     const bankIsEmpty = Object.values(payments).every((value) => !value.trim());
     const bankIsComplete = Object.values(payments).every((value) => value.trim());
     if (!bankIsEmpty && !bankIsComplete) {
-      setError('Enter all three bank details or leave all three blank to hide bank details.');
+      setError('Enter the bank name, account name, account number, and account type, or leave all four blank to hide bank details.');
       setSaving(false);
       return;
     }
@@ -72,6 +73,7 @@ export default function SettingsPage() {
       bankName: bankIsEmpty ? '' : payments.bankName.trim(),
       accountName: bankIsEmpty ? '' : payments.accountName.trim(),
       accountNumber: bankIsEmpty ? '' : payments.accountNumber.trim(),
+      accountType: bankIsEmpty ? '' : payments.accountType.trim(),
     });
     setSaving(false);
     if (!result.ok) setError(result.error);
@@ -108,10 +110,11 @@ export default function SettingsPage() {
           ))}
           <fieldset className="catalogue-setting-card">
             <legend>Bank transfer details</legend>
-            <p className="field-hint">Bank details are hidden from learners until all three fields are saved.</p>
+            <p className="field-hint">Bank details are hidden from learners until all four fields are saved.</p>
             <label>Bank name<input maxLength={100} value={payments.bankName} onChange={(event) => setPayments({ ...payments, bankName: event.target.value })} /></label>
             <label>Account name<input maxLength={100} value={payments.accountName} onChange={(event) => setPayments({ ...payments, accountName: event.target.value })} /></label>
             <label>Account number<input maxLength={40} value={payments.accountNumber} onChange={(event) => setPayments({ ...payments, accountNumber: event.target.value })} /></label>
+            <label>Account type<input maxLength={40} value={payments.accountType} onChange={(event) => setPayments({ ...payments, accountType: event.target.value })} placeholder="e.g. Savings or Current" /></label>
           </fieldset>
           <div className="dialog-actions">
             <button type="submit" className="admin-button button-primary" disabled={saving}>{saving ? 'Saving…' : 'Save settings'}</button>

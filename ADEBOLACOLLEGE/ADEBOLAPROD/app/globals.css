@@ -67,7 +67,7 @@ button, input, textarea, select { font: inherit; }
   color: var(--navy);
   font-weight: 800;
 }
-.brand-mark img { width: 100%; height: 100%; object-fit: contain; }
+.brand-mark img { width: 100%; height: auto; max-height: 100%; object-fit: contain; }
 .brand-copy {
   line-height: 1.1;
 }
@@ -337,7 +337,7 @@ button, input, textarea, select { font: inherit; }
 }
 .cta-band {
   margin: 0 auto 5rem;
-  background: linear-gradient(135deg, rgba(16,31,66,0.96), rgba(22,62,161,0.96));
+  background: linear-gradient(135deg, #0b1832, #10244a);
   border-radius: 28px;
   color: white;
   padding: 2rem 2.2rem;
@@ -436,12 +436,32 @@ button, input, textarea, select { font: inherit; }
   display: grid;
   gap: 1rem;
 }
+.faq-navigation {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem 1rem;
+  margin: 0 0 1.2rem;
+}
+.faq-navigation a { color: var(--blue); font-weight: 700; }
 .faq-item {
+  scroll-margin-top: 6rem;
   background: rgba(255,255,255,0.86);
   border: 1px solid var(--line);
   border-radius: 16px;
   padding: 1.1rem 1.2rem;
 }
+.faq-item p { margin: 0; }
+.guest-lesson-list {
+  width: 100%;
+  display: grid;
+  gap: 0.9rem;
+  margin: 0;
+  padding: 1.2rem 1.2rem 1.2rem 2.8rem;
+  color: var(--text);
+  text-align: left;
+}
+.guest-lesson-list li { padding-left: 0.25rem; }
+.guest-lesson-list a { color: #a9c5ff; font-weight: 700; }
 .faq-item h3 {
   margin: 0 0 0.3rem;
   color: var(--navy);
@@ -587,7 +607,8 @@ button, input, textarea, select { font: inherit; }
 
 .brand-mark img {
   width: 100%;
-  height: 100%;
+  height: auto;
+  max-height: 100%;
   object-fit: contain;
 }
 
@@ -838,7 +859,7 @@ button, input, textarea, select { font: inherit; }
   padding: 1.4rem;
   border: 1px solid var(--line);
   border-radius: var(--radius);
-  background: #fff;
+  background: var(--panel);
   box-shadow: var(--shadow);
 }
 
@@ -869,6 +890,9 @@ button, input, textarea, select { font: inherit; }
 .curriculum-section > .container > div > p {
   color: rgba(255,255,255,0.76);
 }
+.pathways-section,
+.statement-section { background: #0b1832; }
+.statement-section p { color: rgba(255,255,255,0.88); }
 
 .pathway-grid,
 .category-grid {
@@ -981,7 +1005,7 @@ button, input, textarea, select { font: inherit; }
 }
 
 .hero-statement-caption {
-  color: rgba(255,255,255,0.68);
+  color: #fff;
   font-size: 0.85rem;
 }
 
@@ -1070,6 +1094,16 @@ button, input, textarea, select { font: inherit; }
 
 .info-panel-light .eyebrow {
   color: #d7e5ff;
+}
+
+.info-panel-light :is(.text-link, .contact-email),
+.info-panel-light :is(.text-link, .contact-email):visited {
+  color: #d7e5ff;
+}
+
+.info-panel-light :is(.text-link, .contact-email):hover,
+.info-panel-light :is(.text-link, .contact-email):focus-visible {
+  color: #fff;
 }
 
 .curriculum-list {
@@ -1299,6 +1333,7 @@ button, input, textarea, select { font: inherit; }
 .contact-card-emphasis .eyebrow {
   color: #fff;
 }
+.two-column > .contact-card-emphasis p { color: #fff; }
 
 .contact-email {
   display: inline-block;
@@ -1614,6 +1649,23 @@ button, input, textarea, select { font: inherit; }
 :root[data-theme='dark'] .nav-panel { border-color: var(--line); background: #1b2940; }
 :root[data-theme='dark'] .nav-panel a { color: #e7edf7; }
 :root[data-theme='dark'] .nav-panel a:hover { background: #2a3a53; }
+:root[data-theme='dark'] .curriculum-section { background: #111d30; color: var(--text); }
+:root[data-theme='dark'] .curriculum-section :is(.text-link, .contact-email),
+:root[data-theme='dark'] .curriculum-section :is(.text-link, .contact-email):visited { color: #b7caff; }
+:root[data-theme='dark'] .curriculum-section :is(.text-link, .contact-email):hover,
+:root[data-theme='dark'] .curriculum-section :is(.text-link, .contact-email):focus-visible { color: #fff; }
+:root[data-theme='dark'] .info-panel-light {
+  border-color: var(--line);
+  background: var(--panel);
+  color: var(--text);
+}
+:root[data-theme='dark'] .info-panel-light h3 { color: var(--navy-strong); }
+:root[data-theme='dark'] .info-panel-light p { color: var(--muted); }
+:root[data-theme='dark'] .info-panel-light .eyebrow { color: #c4d4ff; }
+:root[data-theme='dark'] .info-panel-light :is(.text-link, .contact-email),
+:root[data-theme='dark'] .info-panel-light :is(.text-link, .contact-email):visited { color: #b7caff; }
+:root[data-theme='dark'] .info-panel-light :is(.text-link, .contact-email):hover,
+:root[data-theme='dark'] .info-panel-light :is(.text-link, .contact-email):focus-visible { color: #fff; }
 :root[data-theme='dark'] :is(.feature-card, .info-card, .news-card, .program-card, .gallery-card, .stage-card, .history-card, .school-photo-card, .info-panel:not(.info-panel-light), .paper-card, .category-card, .step-list li, .list-block li, .school-intro, .form-shell, .faq-item, .contact-card) {
   border-color: var(--line);
   background-color: var(--panel);
@@ -1692,4 +1744,85 @@ button, input, textarea, select { font: inherit; }
   :root:not([data-theme='light']):not([data-theme='dark']) :is(.student-auth-form input, .catalogue-search, .catalogue-order-dialog, .lesson-private-pdf, .lesson-private-video) { border-color: #42516a; color: var(--text); background-color: #111c2d; }
   :root:not([data-theme='light']):not([data-theme='dark']) .result-slip { border-color: #405748; border-top-color: #39956b; color: #e4ede7; background: #17251e; }
   :root:not([data-theme='light']):not([data-theme='dark']) :is(.result-slip-header, .result-slip-details, .result-slip-details > div, .result-slip-status, .result-subject-table th, .result-subject-table td) { border-color: #405748; }
+}
+.website-hero-image-preview { display: block; width: min(100%, 900px); max-height: 55vh; object-fit: contain; border: 1px solid var(--line); border-radius: 10px; background: #f5f7fb; }
+
+
+/* Keep intentionally dark feature bands dark in dark theme too.
+   --navy is also used as a text token elsewhere, so it must not control
+   the background of sections that keep white foreground text. */
+:root[data-theme='dark'] :is(.full-bleed, .pathways-section, .statement-section, .curriculum-section) {
+  background-color: #0b1832;
+  color: #edf3ff;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']):not([data-theme='dark']) :is(.full-bleed, .pathways-section, .statement-section, .curriculum-section) {
+    background-color: #0b1832;
+    color: #edf3ff;
+  }
+}
+
+
+
+/* Explicit dark-mode contrast rules for the public feature bands.
+   Preserve button foreground/background pairs and keep cards distinct. */
+:root[data-theme='dark'] .pathways-section,
+:root[data-theme='dark'] .statement-section,
+:root[data-theme='dark'] .curriculum-section,
+:root[data-theme='dark'] .full-bleed {
+  background: #0b1832 !important;
+  background-color: #0b1832 !important;
+  color: #edf3ff;
+}
+:root[data-theme='dark'] .pathways-section .section-header :is(h2, p, .eyebrow),
+:root[data-theme='dark'] .statement-section :is(h2, p, .eyebrow),
+:root[data-theme='dark'] .curriculum-section > .container > .two-column > div:first-child :is(h2, p, .eyebrow) {
+  color: #edf3ff !important;
+}
+:root[data-theme='dark'] .pathways-section .pathway-card {
+  border-color: rgba(255,255,255,0.2);
+  background: rgba(255,255,255,0.07);
+  color: #edf3ff;
+}
+:root[data-theme='dark'] .pathways-section .pathway-card :is(h3, p, .pathway-link) {
+  color: #edf3ff;
+}
+:root[data-theme='dark'] .curriculum-section .info-panel-light {
+  border-color: rgba(255,255,255,0.22);
+  background: rgba(255,255,255,0.08);
+}
+:root[data-theme='dark'] .curriculum-section .info-panel-light :is(h3, p, .eyebrow) {
+  color: #edf3ff !important;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) .pathways-section,
+  :root:not([data-theme='light']) .statement-section,
+  :root:not([data-theme='light']) .curriculum-section,
+  :root:not([data-theme='light']) .full-bleed {
+    background: #0b1832 !important;
+    background-color: #0b1832 !important;
+    color: #edf3ff;
+  }
+  :root:not([data-theme='light']) .pathways-section .section-header :is(h2, p, .eyebrow),
+  :root:not([data-theme='light']) .statement-section :is(h2, p, .eyebrow),
+  :root:not([data-theme='light']) .curriculum-section > .container > .two-column > div:first-child :is(h2, p, .eyebrow) {
+    color: #edf3ff !important;
+  }
+  :root:not([data-theme='light']) .pathways-section .pathway-card {
+    border-color: rgba(255,255,255,0.2);
+    background: rgba(255,255,255,0.07);
+    color: #edf3ff;
+  }
+  :root:not([data-theme='light']) .pathways-section .pathway-card :is(h3, p, .pathway-link) {
+    color: #edf3ff;
+  }
+  :root:not([data-theme='light']) .curriculum-section .info-panel-light {
+    border-color: rgba(255,255,255,0.22);
+    background: rgba(255,255,255,0.08);
+  }
+  :root:not([data-theme='light']) .curriculum-section .info-panel-light :is(h3, p, .eyebrow) {
+    color: #edf3ff !important;
+  }
 }

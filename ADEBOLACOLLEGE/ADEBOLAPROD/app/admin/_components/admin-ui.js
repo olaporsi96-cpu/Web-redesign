@@ -54,7 +54,7 @@ export function ConfirmDialog({ title, description, confirmLabel, onConfirm, onC
       >
         <span className="dialog-warning-icon" aria-hidden="true">!</span>
         <h2 id="confirm-title">{title}</h2>
-        <p id="confirm-description">{description}</p>
+        <div id="confirm-description" className="confirm-description">{description}</div>
         <div className="dialog-actions">
           <button type="button" className="admin-button button-secondary" onClick={onCancel}>Cancel</button>
           <button type="button" className="admin-button button-danger" onClick={onConfirm}>{confirmLabel}</button>

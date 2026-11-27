@@ -1,7 +1,10 @@
 import Image from 'next/image';
 import Link from 'next/link';
+import ContactEmailLink from '../../components/contact-email-link';
 import { createClient } from '../../utils/supabase/server';
 import calendarEventTypeConfig from '../../utils/calendar-event-types.cjs';
+
+export const dynamic = 'force-dynamic';
 
 const { calendarEventTypes } = calendarEventTypeConfig;
 const calendarEventLabels = new Map(calendarEventTypes.map(({ value, label }) => [value, label]));
@@ -9,15 +12,15 @@ const calendarEventLabels = new Map(calendarEventTypes.map(({ value, label }) =>
 const developmentAreas = [
   {
     title: 'Academic learning',
-    text: 'Classroom learning and group projects are described in the school content as part of the student experience.',
+    text: 'Classroom learning and group projects are part of the student experience.',
   },
   {
     title: 'Personal growth',
-    text: 'The supplied material highlights communication, time management, and problem-solving skills.',
+    text: 'Students develop communication, time management, and problem-solving skills.',
   },
   {
     title: 'Community involvement',
-    text: 'The school content describes community involvement as part of student life and personal development.',
+    text: 'Community involvement is part of student life and personal development.',
   },
 ];
 
@@ -56,8 +59,8 @@ export default async function StudentLifePage() {
             <span className="eyebrow eyebrow-light">Student Life</span>
             <h1>Learning, personal growth, and community.</h1>
             <p>
-              The student-life information supplied by Adebola College describes a blend of academic learning,
-              personal development, and community involvement.
+              Student life at Adebola College brings together academic learning, personal development, and community
+              involvement.
             </p>
             <div className="hero-actions">
               <Link href="/families" className="btn btn-primary">Information for families</Link>
@@ -66,7 +69,7 @@ export default async function StudentLifePage() {
           </div>
           <div className="hero-statement">
             <p>Learn<br />Grow<br />Contribute</p>
-            <span className="hero-statement-caption">Themes in the supplied student-life content</span>
+            <span className="hero-statement-caption">Student life at Adebola College</span>
           </div>
         </div>
       </section>
@@ -76,14 +79,7 @@ export default async function StudentLifePage() {
           <div className="section-header">
             <span className="eyebrow">The student experience</span>
             <h2>Opportunities to learn and develop.</h2>
-            <p>
-              These themes reflect the supplied school overview; contact the College to confirm current activities
-              and programmes.
-            </p>
-            <p>
-              The supplied content also addresses student wellbeing. Contact the College to confirm current support
-              arrangements.
-            </p>
+            <p>Students learn, develop personal skills, and take part in their community.</p>
           </div>
           <div className="card-grid">
             {developmentAreas.map((area) => (
@@ -100,10 +96,7 @@ export default async function StudentLifePage() {
               width={872}
               height={1163}
             />
-            <figcaption>
-              Students using sewing machines in a supplied school photograph. This image documents an activity and
-              does not confirm a current course or programme.
-            </figcaption>
+            <figcaption>Students using sewing machines during a practical skills activity.</figcaption>
           </figure>
         </div>
       </section>
@@ -113,10 +106,7 @@ export default async function StudentLifePage() {
           <div>
             <span className="eyebrow">Outdoor activity</span>
             <h2 className="display-heading">Students taking part in a field exercise.</h2>
-            <p>
-              The supplied photographs show students participating in outdoor field activities. They illustrate
-              student activity but do not confirm a current clubs, sports, or events schedule.
-            </p>
+            <p>Students take part in outdoor field activities.</p>
           </div>
           <figure className="school-photo-card">
             <Image
@@ -136,15 +126,14 @@ export default async function StudentLifePage() {
             <span className="eyebrow eyebrow-light">Beyond the classroom</span>
             <h2>Participation and connection.</h2>
             <p>
-              The source material refers to extracurricular opportunities and explains that participation can help
-              learners build confidence, explore interests, develop leadership skills, and form friendships. It does
-              not identify the College’s current clubs, teams, or activity schedule.
+              Extracurricular participation can help learners build confidence, explore interests, develop leadership
+              skills, and form friendships.
             </p>
           </div>
           <div className="info-panel info-panel-light">
-            <span className="eyebrow">Current activities</span>
-            <h3>Ask the College for confirmed details.</h3>
-            <p>Specific clubs, sports, facilities, and event dates are not published here without confirmation.</p>
+            <span className="eyebrow">Activities</span>
+            <h3>Learn more about student activities.</h3>
+            <p>Contact Adebola College for information about available activities.</p>
             <Link href="/contact-us" className="text-link">Contact Adebola College <span aria-hidden="true">→</span></Link>
           </div>
         </div>
@@ -176,9 +165,7 @@ export default async function StudentLifePage() {
               <p>No published events are currently scheduled. Check back for updates.</p>
             )}
           </div>
-          <a className="btn btn-outline" href="mailto:contactus@adebolacollege.org">
-            Ask about upcoming events
-          </a>
+          <ContactEmailLink className="btn btn-outline">Ask about upcoming events</ContactEmailLink>
         </div>
       </section>
     </>

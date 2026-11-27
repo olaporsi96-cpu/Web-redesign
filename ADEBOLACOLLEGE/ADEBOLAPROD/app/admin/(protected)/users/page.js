@@ -71,7 +71,7 @@ function SubAdminForm({ account, onSave, onClose }) {
           <p className="admin-form-note">
             {account
               ? 'Changes take effect immediately. Sub-Admins cannot manage Admin accounts or grant permissions.'
-              : 'An invitation email will be sent. The invited person sets their own password before signing in.'}
+              : 'A Supabase invitation request will be sent. Final email delivery depends on the TEST or production SMTP configuration. The invited person sets their own password before signing in.'}
           </p>
           {!account && (
             <p className="admin-form-note">
@@ -167,7 +167,9 @@ export default function AdminUsersPage() {
       ? await saveSubAdminPermissions({ ...account, id: editing.id })
       : await inviteSubAdmin(account);
     if (response.ok) {
-      setToast(editing ? 'Sub-Admin permissions saved.' : 'Invitation sent.');
+      setToast(editing
+        ? 'Sub-Admin permissions saved.'
+        : 'Supabase accepted the invitation request. Final email delivery is not confirmed until provider logs show success.');
       await loadAccounts();
     }
     return response;

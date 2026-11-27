@@ -1,17 +1,65 @@
 import Link from 'next/link';
+import ContactEmailLink from '../../components/contact-email-link';
 
 const entrancePapers = [
   { title: 'JSS1 English', file: 'JSS1-EntranceExam-English.pdf' },
   { title: 'JSS1 Mathematics', file: 'JSS1-EntranceExam-Maths.pdf' },
-  { title: 'SSS1 English', file: 'SSS1-EntranceExam-English.pdf' },
-  { title: 'SSS1 Mathematics', file: 'SSS1-EntranceExam-Maths.pdf' },
+  { title: 'SS1 English', file: 'SSS1-EntranceExam-English.pdf' },
+  { title: 'SS1 Mathematics', file: 'SSS1-EntranceExam-Maths.pdf' },
 ];
 
 const admissionSteps = [
-  'Review the entrance examination information and sample papers.',
-  'Contact the College to confirm current examination dates, venue, and application instructions.',
-  'Submit an application using the instructions confirmed by the Admissions team.',
-  'Complete the entrance examination and await an admissions decision.',
+  'Admission to Adebola College is through examination.',
+  'Admission is offered on merit and granted in order of application.',
+  'Check the school website newsletters for entrance examination dates and venues.',
+];
+
+const admissionQuestions = [
+  {
+    id: 'faq-age',
+    question: 'What is the expected age for admission?',
+    answer: 'Students are expected to have reached the age of 10 by September of their first year.',
+  },
+  {
+    id: 'faq-entry-years',
+    question: 'Which year groups are listed for admission?',
+    answer: 'Adebola College usually admits JSS1 students and midstream students into JSS2, SS1, and SS2.',
+  },
+  {
+    id: 'faq-method',
+    question: 'How is admission granted?',
+    answer: 'Admission is through examination, is offered on merit, and is granted in order of application.',
+  },
+  {
+    id: 'faq-exam',
+    question: 'What does the entrance examination cover?',
+    answer: 'Areas include arithmetic, fractions, word problems, English essays, sentences, grammar, and other topics.',
+  },
+  {
+    id: 'faq-dates',
+    question: 'Where can I find examination dates and venues?',
+    answer: 'Check the school website newsletters for important entrance examination dates and venues.',
+  },
+  {
+    id: 'faq-papers',
+    question: 'Which sample entrance examination papers are available?',
+    answer: 'The College provides JSS1 English, JSS1 Mathematics, SS1 English, and SS1 Mathematics sample entrance examination papers for prospective students to review.',
+  },
+  {
+    id: 'faq-cbt',
+    question: 'Which computer-based examinations does the College facilitate?',
+    answer: 'Adebola College facilitates Computer-Based Testing (CBT) for examination bodies such as JAMB and WAEC.',
+  },
+  {
+    id: 'faq-cbt-fees',
+    question: 'What are the listed JAMB and WAEC registration fees?',
+    answer: 'The supplied Admissions information lists the JAMB enrollment registration fee as #40,000 and the WAEC enrollment form registration fee as #30,000.',
+  },
+  {
+    id: 'faq-cbt-payment',
+    question: 'Where should CBT examination fees be paid and where should proof be sent?',
+    answer: 'The supplied Admissions information lists GTB Bank, account number 0008456903. Proof of payment should be sent to contactus@adebola.org.',
+  },
 ];
 
 export default function AdmissionsPage() {
@@ -23,17 +71,20 @@ export default function AdmissionsPage() {
             <span className="eyebrow eyebrow-light">Admissions</span>
             <h1>Take the next step toward Adebola College.</h1>
             <p>
-              Admission information below is drawn from the school content supplied by the College. Confirm current
-              dates and instructions directly before applying.
+              Admission is through examination. Applications are considered on merit, and admission is granted in
+              order of application.
+            </p>
+            <p>
+              The College offers academic, athletic, and arts programmes alongside character-building activities.
             </p>
             <div className="hero-actions">
-              <a href="mailto:contactus@adebolacollege.org" className="btn btn-primary">Email Admissions</a>
+              <ContactEmailLink className="btn btn-primary">Email Admissions</ContactEmailLink>
               <Link href="/contact-us" className="btn btn-secondary">Contact details</Link>
             </div>
           </div>
           <div className="hero-statement">
             <p>Entrance examination<br />JSS1 · JSS2 · SS1 · SS2</p>
-            <span className="hero-statement-caption">Entry points listed in supplied school content</span>
+            <span className="hero-statement-caption">Entry points at Adebola College</span>
           </div>
         </div>
       </section>
@@ -42,15 +93,11 @@ export default function AdmissionsPage() {
         <div className="container two-column">
           <div>
             <span className="eyebrow">Admission process</span>
-            <h2 className="display-heading">Examination-based admission.</h2>
+            <h2 className="display-heading">Admission by examination.</h2>
             <p>
-              The supplied content states that admission is by examination, with applications considered on merit.
-              It lists JSS1 and midstream entry into JSS2, SS1, and SS2. Examination dates and venues are not listed
-              in the supplied material currently available, so contact the College to confirm them.
-            </p>
-            <p>
-              The same content says applicants are expected to have reached age 10 by September of their first year.
-              Confirm the current age and entry requirements with Admissions.
+              Student enrollment is open to students expected to have reached age 10 by September of their first
+              year. Admission is through an ongoing examination and is offered on merit. Adebola College usually
+              admits JSS1 students and midstream students into JSS2, SS1, and SS2.
             </p>
           </div>
           <ol className="step-list">
@@ -69,9 +116,9 @@ export default function AdmissionsPage() {
           <div className="section-header section-heading-row">
             <div>
               <span className="eyebrow">Sample entrance examinations</span>
-              <h2>Practice with the supplied papers.</h2>
+              <h2>Review the sample papers.</h2>
             </div>
-            <p>The school content recommends reviewing sample papers. Files open as PDFs in a new tab.</p>
+            <p>Prospective students are recommended to review the sample entrance examination papers.</p>
           </div>
           <div className="paper-grid">
             {entrancePapers.map((paper) => (
@@ -89,25 +136,50 @@ export default function AdmissionsPage() {
             ))}
           </div>
           <p className="content-note">
-            Sample papers are provided for preparation. The supplied content describes examination areas including
-            arithmetic, fractions, word problems, English essays, sentences, and grammar.
+            The entrance examination covers arithmetic, fractions, word problems, English essays, sentences, grammar,
+            and other areas.
           </p>
+        </div>
+      </section>
+
+      <section id="cbt-registration" className="section curriculum-section">
+        <div className="container two-column">
+          <div>
+            <span className="eyebrow eyebrow-light">CBT exam registration</span>
+            <h2>Computer-Based Testing</h2>
+            <p>Adebola College facilitates Computer-Based Testing (CBT) for examination bodies such as JAMB and WAEC.</p>
+            <p>JAMB Enrollment (Registration Fee - #40,000)</p>
+            <p>WAEC Enrollment Form (Registration Fee - #30,000)</p>
+          </div>
+          <div className="info-panel info-panel-light">
+            <span className="eyebrow">CBT examination fees</span>
+            <h3>Payment account</h3>
+            <p>Bank: GTB Bank</p>
+            <p>Account #: 0008456903</p>
+            <p>Send proof of payment to <a href="mailto:contactus@adebola.org">contactus@adebola.org</a>.</p>
+            <p>For additional information about CBT examination registration, contact the College at contactus@adebola.org.</p>
+          </div>
         </div>
       </section>
 
       <section id="faq" className="section section-tight">
         <div className="container-narrow">
           <div className="section-header">
-            <span className="eyebrow">Questions?</span>
-            <h2>Confirm current admission details.</h2>
-            <p>
-              Application dates, venues, fees, and required documents are not specified in the current source
-              material. Please ask the Admissions team for the latest information.
-            </p>
+            <span className="eyebrow">Admissions FAQ</span>
+            <h2>Frequently asked questions</h2>
           </div>
-          <a className="btn btn-outline" href="mailto:contactus@adebolacollege.org">
-            contactus@adebolacollege.org
-          </a>
+          <nav className="faq-navigation" aria-label="Admissions frequently asked questions">
+            {admissionQuestions.map((item) => <a key={item.id} href={`#${item.id}`}>{item.question}</a>)}
+          </nav>
+          <div className="faq-list">
+            {admissionQuestions.map((item) => (
+              <article className="faq-item" id={item.id} key={item.id}>
+                <h3>{item.question}</h3>
+                <p>{item.answer}</p>
+              </article>
+            ))}
+          </div>
+          <p>For Admissions enquiries, contact <ContactEmailLink />.</p>
         </div>
       </section>
     </>
