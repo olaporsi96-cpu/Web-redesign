@@ -1853,7 +1853,8 @@ create trigger course_orders_audit_log
   after insert or update or delete on public.course_orders
   for each row execute function public.write_sensitive_audit_log();
 
-alter table storage.objects enable row level security;
+-- Supabase Storage enables RLS on storage.objects by default.
+-- Do not ALTER this managed table; define Storage access policies below.
 insert into storage.buckets(id, name, public, file_size_limit, allowed_mime_types)
 values ('course-materials', 'course-materials', false, 52428800, array['application/pdf', 'video/mp4'])
 on conflict (id) do nothing;
